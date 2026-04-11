@@ -108,20 +108,54 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FND-01 through FND-08 | Phase 1 | Pending |
-| MAP-01 through MAP-07 | Phase 2 | Pending |
-| CRUD-01 through CRUD-09 | Phase 3 | Pending |
-| FLT-01 through FLT-05 | Phase 4 | Pending |
-| ANA-01 through ANA-06 | Phase 4 | Pending |
-| IMP-01 through IMP-04 | Phase 5 | Pending |
-| STAT-01 through STAT-03 | Phase 5 | Pending |
-| Responsive & polish | Phase 6 | Pending |
+| FND-01 | Phase 1 | Pending |
+| FND-02 | Phase 1 | Pending |
+| FND-03 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Pending |
+| FND-05 | Phase 1 | Pending |
+| FND-06 | Phase 1 | Pending |
+| FND-07 | Phase 1 | Pending |
+| FND-08 | Phase 1 | Pending |
+| MAP-01 | Phase 2 | Pending |
+| MAP-02 | Phase 2 | Pending |
+| MAP-03 | Phase 2 | Pending |
+| MAP-04 | Phase 2 | Pending |
+| MAP-05 | Phase 2 | Pending |
+| MAP-06 | Phase 2 | Pending |
+| MAP-07 | Phase 2 | Pending |
+| CRUD-01 | Phase 3 | Pending |
+| CRUD-02 | Phase 3 | Pending |
+| CRUD-03 | Phase 3 | Pending |
+| CRUD-04 | Phase 3 | Pending |
+| CRUD-05 | Phase 3 | Pending |
+| CRUD-06 | Phase 3 | Pending |
+| CRUD-07 | Phase 3 | Pending |
+| CRUD-08 | Phase 3 | Pending |
+| CRUD-09 | Phase 3 | Pending |
+| FLT-01 | Phase 4 | Pending |
+| FLT-02 | Phase 4 | Pending |
+| FLT-03 | Phase 4 | Pending |
+| FLT-04 | Phase 4 | Pending |
+| FLT-05 | Phase 4 | Pending |
+| ANA-01 | Phase 4 | Pending |
+| ANA-02 | Phase 4 | Pending |
+| ANA-03 | Phase 4 | Pending |
+| ANA-04 | Phase 4 | Pending |
+| ANA-05 | Phase 4 | Pending |
+| ANA-06 | Phase 4 | Pending |
+| IMP-01 | Phase 5 | Pending |
+| IMP-02 | Phase 5 | Pending |
+| IMP-03 | Phase 5 | Pending |
+| IMP-04 | Phase 5 | Pending |
+| STAT-01 | Phase 5 | Pending |
+| STAT-02 | Phase 5 | Pending |
+| STAT-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 38 total
-- Mapped to phases: 38
-- Unmapped: 0 ✓
+- Mapped to phases: 38 (100%)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-11*
-*Last updated: 2026-04-11 after initial definition*
+*Last updated: 2026-04-11 after roadmap creation*

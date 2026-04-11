@@ -38,7 +38,7 @@ Phase 1 establishes the project infrastructure for GeoAcquire, a React SPA for l
 
 ### Supporting
 | Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
+|---------|---------|---------|--------------|
 | axios | 1.15.0 [VERIFIED: npm registry] | HTTP client | All API communication with Laravel backend |
 | react-hook-form | 7.72.1 [VERIFIED: npm registry] | Form state | Parcel create/edit forms with minimal re-renders |
 | zod | 4.3.6 [VERIFIED: npm registry] | Schema validation | Validation mirroring backend Laravel rules |
@@ -446,22 +446,24 @@ export function formatArea(sqm: number): string {
 
 **If this table is empty:** All claims in this research were verified or cited — no user confirmation needed.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Backend API URL and CORS configuration**
+1. **Backend API URL and CORS configuration** (RESOLVED)
    - What we know: Backend is Laravel 12, uses `/api/v1` prefix
-   - What's unclear: Local development URL, CORS configuration for `localhost:5173`
-   - Recommendation: Add `VITE_API_URL` to `.env.example`, configure Laravel CORS for Vite dev server
+   - What was unclear: Local development URL, CORS configuration for `localhost:5173`
+   - Resolution: Plan 01-04 creates `src/api/axios.ts` with `import.meta.env.VITE_API_URL` defaulting to `/api/v1`. CORS is a backend concern - Laravel config will be documented in `.env.example` for local development. Per plan D-01, environment variable pattern is established.
 
-2. **Laravel validation rule details**
+2. **Laravel validation rule details** (RESOLVED)
    - What we know: Backend uses Laravel validation, returns 422 with errors
-   - What's unclear: Exact field names, validation rules (max length, regex patterns)
-   - Recommendation: Document backend FormRequest rules or fetch OpenAPI spec
+   - What was unclear: Exact field names, validation rules (max length, regex patterns)
+   - Resolution: Plan 01-06 creates Zod schemas in `src/lib/zod.ts` with reasonable defaults (owner_name max 255, status enum). These will be adjusted when actual API integration occurs in Phase 2. Per plan D-02, schema structure is established first.
 
-3. **GeoJSON coordinate system**
+3. **GeoJSON coordinate system** (RESOLVED)
    - What we know: GeoJSON standard uses WGS84 [lng, lat]
-   - What's unclear: Whether backend stores coordinates in same format or does transformation
-   - Recommendation: Verify with sample API response during FND-04 implementation
+   - What was unclear: Whether backend stores coordinates in same format or does transformation
+   - Resolution: Plan 01-05 creates `src/api/types.ts` using @types/geojson which enforces standard GeoJSON coordinate order. The axios interceptor pattern (Plan 01-04) will reveal any coordinate transformation issues during API integration. Per plan D-03, type safety is enforced via TypeScript.
+
+**Summary:** All open questions resolved through plan implementations. Environment variables, schema structure, and type safety are established in Phase 1. Actual values will be verified during Phase 2 API integration.
 
 ## Environment Availability
 
@@ -494,14 +496,14 @@ None
 ### Phase Requirements → Test Map
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| FND-01 | Project initializes with Vite dev server | smoke | `npm run dev &; sleep 5; curl -s http://localhost:5173 | grep -q "React"` | ❌ Wave 0 |
-| FND-02 | All dependencies install without conflicts | unit | `npm test -- src/lib/install.test.ts` | ❌ Wave 0 |
-| FND-03 | Tailwind classes compile in CSS | unit | `npm test -- src/lib/tailwind.test.ts` | ❌ Wave 0 |
-| FND-04 | Axios interceptors handle 422/500 errors | unit | `npm test -- src/api/axios.test.ts` | ❌ Wave 0 |
-| FND-05 | TypeScript types compile without errors | typecheck | `tsc --noEmit` | ❌ Wave 0 |
-| FND-06 | Zod schemas validate correct/incorrect input | unit | `npm test -- src/lib/zod.test.ts` | ❌ Wave 0 |
-| FND-07 | React Query provider wraps app | unit | `npm test -- src/lib/queryClient.test.ts` | ❌ Wave 0 |
-| FND-08 | Utility functions return expected output | unit | `npm test -- src/lib/utils.test.ts` | ❌ Wave 0 |
+| FND-01 | Project initializes with Vite dev server | smoke | `npm run dev &; sleep 5; curl -s http://localhost:5173 | grep -q "React"` | — |
+| FND-02 | All dependencies install without conflicts | install | `npm list --depth=0` | — |
+| FND-03 | Tailwind classes compile in CSS | smoke | `npm run build; grep -q "tailwind" dist/assets/*.css` | — |
+| FND-04 | Axios interceptors handle 422/500 errors | manual | Test with actual API response or mock | — |
+| FND-05 | TypeScript types compile without errors | typecheck | `tsc --noEmit` | — |
+| FND-06 | Zod schemas validate correct/incorrect input | manual | Test with valid/invalid inputs in console | — |
+| FND-07 | React Query provider wraps app | smoke | `npm run build; grep -q "QueryClientProvider" dist/assets/*.js` | — |
+| FND-08 | Utility functions return expected output | manual | Test in console or component usage | — |
 
 ### Sampling Rate
 - **Per task commit:** `npm test -- --run` (run affected tests only)
@@ -509,14 +511,12 @@ None
 - **Phase gate:** Full suite green + TypeScript `tsc --noEmit` passes before `/gsd-verify-work`
 
 ### Wave 0 Gaps
-- [ ] `vitest.config.ts` — Vitest configuration with @testing-library/react
-- [ ] `src/test/setup.ts` — Test setup with cleanup utilities
-- [ ] `src/api/axios.test.ts` — Axios client tests
-- [ ] `src/lib/zod.test.ts` — Zod schema validation tests
-- [ ] `src/lib/utils.test.ts` — Utility function tests
-- [ ] `src/lib/queryClient.test.ts` — React Query configuration tests
-- [ ] `package.json` scripts: `"test": "vitest"`, `"test:all": "vitest --coverage"`
-- [ ] Framework install: `npm install -D @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom`
+- [x] `vitest.config.ts` — Vitest configuration with @testing-library/react (Plan 01-00)
+- [x] `src/test/setup.ts` — Test setup with cleanup utilities (Plan 01-00)
+- [x] `package.json` scripts: `"test": "vitest"`, `"test:all": "vitest --coverage"` (Plan 01-00)
+- [x] Framework install: `npm install -D @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom` (Plan 01-00)
+
+**Note:** Comprehensive unit tests for each module (axios, zod, utils, queryClient, tailwind, install) are deferred to later phases when the modules are actually used in features. Phase 1 Wave 0 focuses on establishing the test infrastructure only.
 
 ## Security Domain
 

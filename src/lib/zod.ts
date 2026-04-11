@@ -1,9 +1,8 @@
 import { z } from 'zod'
-import type { ParcelStatus } from '../api/types'
 
 // Parcel status enum (matches backend)
 export const parcelStatusEnum = z.enum(['free', 'negotiating', 'target'], {
-  errorMap: () => ({ message: 'Status must be free, negotiating, or target' }),
+  message: 'Status must be free, negotiating, or target',
 })
 
 // GeoJSON Polygon coordinate validation
@@ -21,7 +20,7 @@ const ringSchema = z.array(coordinateSchema).min(4, {
 // GeoJSON Polygon geometry
 export const parcelGeometrySchema = z.object({
   type: z.literal('Polygon', {
-    errorMap: () => ({ message: 'Geometry type must be Polygon' }),
+    message: 'Geometry type must be Polygon',
   }),
   coordinates: z.array(ringSchema).min(1, {
     message: 'Polygon must have at least one ring',
@@ -32,7 +31,7 @@ export const parcelGeometrySchema = z.object({
 export const parcelSchema = z.object({
   owner_name: z
     .string({
-      required_error: 'Owner name is required',
+      message: 'Owner name is required',
     })
     .min(1, 'Owner name is required')
     .max(255, 'Owner name must not exceed 255 characters')
@@ -40,7 +39,7 @@ export const parcelSchema = z.object({
   status: parcelStatusEnum,
   price_per_sqm: z
     .number({
-      invalid_type_error: 'Price must be a number',
+      message: 'Price must be a number',
     })
     .min(0, 'Price must be positive')
     .optional(),
@@ -52,19 +51,19 @@ export const bufferRequestSchema = z.object({
   parcel_id: z.number().int().positive().optional(),
   lat: z
     .number({
-      required_error: 'Latitude is required',
+      message: 'Latitude is required',
     })
     .min(-90, 'Latitude must be between -90 and 90')
     .max(90, 'Latitude must be between -90 and 90'),
   lng: z
     .number({
-      required_error: 'Longitude is required',
+      message: 'Longitude is required',
     })
     .min(-180, 'Longitude must be between -180 and 180')
     .max(180, 'Longitude must be between -180 and 180'),
   distance: z
     .number({
-      required_error: 'Distance is required',
+      message: 'Distance is required',
     })
     .min(1, 'Distance must be at least 1 meter')
     .max(10000, 'Distance must not exceed 10000 meters')

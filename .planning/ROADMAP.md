@@ -30,7 +30,7 @@
 4. Axios can successfully fetch from the backend API with proper error handling
 5. React Query cache strategy prevents unnecessary refetches on window focus
 
-**Plans**: TBD
+**Plans**: 5 plans complete
 
 ---
 
@@ -50,7 +50,14 @@
 5. Status bar shows total parcel count and pagination controls
 6. Loading skeleton appears on initial load, empty state shows when no parcels exist
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+- [ ] 02-01-PLAN.md — Install lucide-react, import Leaflet CSS, create test utilities, build LoadingSkeleton and EmptyState components
+- [ ] 02-02-PLAN.md — Create useParcels React Query hook and MapHeader component with action buttons
+- [ ] 02-03-PLAN.md — Create MapView with Leaflet MapContainer, ParcelLayer with GeoJSON rendering, and MapStatusBar
+- [ ] 02-04-PLAN.md — Create ParcelSidebar with slide-in animation for parcel details
+- [ ] 02-05-PLAN.md — Wire all components in App.tsx with full-screen layout
+
 **UI hint**: yes
 
 ---

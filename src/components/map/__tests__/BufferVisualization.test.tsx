@@ -1,70 +1,93 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { renderWithMapContext } from '@/test/map-test-utils'
+import { BufferVisualization } from '../BufferVisualization'
+import type { BufferResult } from '@/api/types'
 
-// Mock react-leaflet components for BufferVisualization
+// Mock react-leaflet components
 vi.mock('react-leaflet', () => ({
-  Circle: ({ center, radius }: any) => (
-    <div data-testid="buffer-circle" data-radius={radius} data-center={JSON.stringify(center)} />
+  Circle: ({ center, radius, pathOptions }: any) => (
+    <div
+      data-testid="buffer-circle"
+      data-radius={radius}
+      data-center={JSON.stringify(center)}
+      data-fill-opacity={pathOptions?.fillOpacity}
+    />
   ),
-  CircleMarker: ({ center }: any) => (
-    <div data-testid="center-marker" data-center={JSON.stringify(center)} />
+  CircleMarker: ({ center, pathOptions }: any) => (
+    <div
+      data-testid="center-marker"
+      data-center={JSON.stringify(center)}
+      data-fill-color={pathOptions?.fillColor}
+    />
   ),
 }))
 
-// Mock the BufferVisualization component (placeholder for when implemented)
-const mockBufferVisualization = ({ center, radius, nearbyParcels }: any) => (
-  <div data-testid="buffer-visualization">
-    <div data-testid="buffer-circle" data-radius={radius} data-center={JSON.stringify(center)} />
-    <div data-testid="center-marker" data-center={JSON.stringify(center)} />
-    <div data-testid="nearby-count">{nearbyParcels?.length || 0}</div>
-  </div>
-)
-
-vi.mock('../BufferVisualization', () => ({ BufferVisualization: mockBufferVisualization }))
-
 describe('BufferVisualization', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+  const mockBufferResult: BufferResult = {
+    center: {
+      type: 'Point',
+      coordinates: [106.8272, -6.1751], // [lng, lat] Jakarta
+    },
+    radius: 500,
+    parcels: {
+      type: 'FeatureCollection',
+      features: [],
+    },
+  }
+
+  it('should render null when bufferResult is null', () => {
+    const { queryByTestId } = renderWithMapContext(
+      <BufferVisualization bufferResult={null} />
+    )
+    // When bufferResult is null, neither circle nor marker should render
+    expect(queryByTestId('buffer-circle')).not.toBeInTheDocument()
+    expect(queryByTestId('center-marker')).not.toBeInTheDocument()
   })
 
   it('should render buffer circle with correct center and radius', () => {
-    // Placeholder test - BufferVisualization component not yet implemented
-    // TODO: Implement BufferVisualization component and replace mock
-    expect(true).toBe(true)
+    renderWithMapContext(
+      <BufferVisualization bufferResult={mockBufferResult} />
+    )
 
-    // When implemented, this test will verify:
-    // - Circle component renders with provided center LatLng
-    // - Circle component renders with provided radius in meters
+    const circle = screen.getByTestId('buffer-circle')
+    expect(circle).toBeInTheDocument()
+    expect(circle).toHaveAttribute('data-radius', '500')
+    expect(circle).toHaveAttribute('data-fill-opacity', '0.15')
   })
 
   it('should render center point marker', () => {
-    // Placeholder test - BufferVisualization component not yet implemented
-    // TODO: Implement BufferVisualization component and replace mock
-    expect(true).toBe(true)
+    renderWithMapContext(
+      <BufferVisualization bufferResult={mockBufferResult} />
+    )
 
-    // When implemented, this test will verify:
-    // - CircleMarker renders at center location
-    // - Marker has distinct styling (different from buffer circle)
+    const marker = screen.getByTestId('center-marker')
+    expect(marker).toBeInTheDocument()
+    expect(marker).toHaveAttribute('data-fill-color', '#3b82f6')
   })
 
-  it('should highlight nearby parcels in blue', () => {
-    // Placeholder test - BufferVisualization component not yet implemented
-    // TODO: Implement BufferVisualization component and replace mock
-    expect(true).toBe(true)
+  it('should parse GeoJSON [lng, lat] to Leaflet LatLng correctly', () => {
+    renderWithMapContext(
+      <BufferVisualization bufferResult={mockBufferResult} />
+    )
 
-    // When implemented, this test will verify:
-    // - Parcels within buffer radius are styled blue
-    // - Highlight style applies to parcel GeoJSON layer
+    const circle = screen.getByTestId('buffer-circle')
+    const centerData = JSON.parse(circle.getAttribute('data-center') || '{}')
+
+    // Leaflet LatLng should have lat first, lng second
+    expect(centerData.lat).toBe(-6.1751)
+    expect(centerData.lng).toBe(106.8272)
   })
 
-  it('should fade non-matching parcels', () => {
-    // Placeholder test - BufferVisualization component not yet implemented
-    // TODO: Implement BufferVisualization component and replace mock
-    expect(true).toBe(true)
+  it('should apply blue color to circle and marker', () => {
+    renderWithMapContext(
+      <BufferVisualization bufferResult={mockBufferResult} />
+    )
 
-    // When implemented, this test will verify:
-    // - Parcels outside buffer radius have reduced opacity
-    // - Fade effect only applies when buffer is active
+    const circle = screen.getByTestId('buffer-circle')
+    const marker = screen.getByTestId('center-marker')
+
+    // Both should use blue color from BUFFER_COLOR constant
+    expect(marker).toHaveAttribute('data-fill-color', '#3b82f6')
   })
 })

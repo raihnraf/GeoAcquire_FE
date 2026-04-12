@@ -86,7 +86,7 @@
 - [x] 03-01-PLAN.md — Form validation and API error handling (CRUD-06, CRUD-07)
 - [x] 03-02-PLAN.md — FormField and ParcelForm components (CRUD-02)
 - [x] 03-03-PLAN.md — useCreateParcel hook and DrawingHandler (CRUD-01, CRUD-08, CRUD-09)
-- [ ] 03-04-PLAN.md — DrawingPreview and MapView drawing integration (CRUD-01)
+- [x] 03-04-PLAN.md — DrawingPreview and MapView drawing integration (CRUD-01)
 - [ ] 03-05-PLAN.md — ParcelSidebar view/edit/create modes (CRUD-03, CRUD-04)
 - [ ] 03-06-PLAN.md — useUpdateParcel, useDeleteParcel hooks and DeleteConfirmModal (CRUD-04, CRUD-05, CRUD-08, CRUD-09)
 - [ ] 03-07-PLAN.md — DrawingToolbar and App-level workflow integration (CRUD-01, CRUD-03, CRUD-04, CRUD-05)

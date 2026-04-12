@@ -31,7 +31,7 @@ function App() {
   const { filters, setFilters, clearFilters } = useFilterParams()
 
   // Map mode hook for bbox and buffer modes
-  const { mode, enterBboxMode, exitMode } = useMapMode()
+  const { mode, enterBboxMode, enterBufferMode, exitMode } = useMapMode()
 
   // Selected parcel state for sidebar
   const [selectedParcel, setSelectedParcel] = useState<ParcelFeature | null>(null)
@@ -49,12 +49,11 @@ function App() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [parcelToDelete, setParcelToDelete] = useState<ParcelFeature | null>(null)
 
-  // Buffer analysis state
-  const [bufferCenter, setBufferCenter] = useState<L.LatLng | null>(null)
-  const [bufferRadius, setBufferRadius] = useState(500)
-
-  // Buffer analysis hook
-  const { data: bufferResult } = useBufferAnalysis(bufferCenter, bufferRadius)
+  // Buffer analysis hook - uses filters from useFilterParams
+  const { data: bufferResult } = useBufferAnalysis(
+    filters.bufferCenter,
+    filters.bufferRadius
+  )
 
   // Handle parcel click from map
   const handleParcelClick = useCallback((id: number) => {
@@ -148,22 +147,40 @@ function App() {
     // Set buffer center from selected parcel geometry
     if (selectedParcel) {
       const coords = selectedParcel.geometry.coordinates[0][0]
-      setBufferCenter(L.latLng(coords[1], coords[0]))
-      setBufferRadius(500)
+      setFilters({
+        ...filters,
+        bufferCenter: L.latLng(coords[1], coords[0]),
+        bufferRadius: 500,
+      })
     }
     setSidebarMode('buffer')
-  }, [selectedParcel])
+  }, [selectedParcel, filters, setFilters])
 
   // Handle buffer apply - sets the center and radius for analysis
   const handleBufferApply = useCallback((radius: number) => {
-    setBufferRadius(radius)
-    // bufferCenter should already be set from parcel selection
-  }, [])
+    setFilters({ ...filters, bufferRadius: radius })
+    // bufferCenter should already be set from parcel selection or point click
+  }, [filters, setFilters])
 
   // Handle Draw Box button click
   const handleDrawBoxClick = useCallback(() => {
     enterBboxMode()
   }, [enterBboxMode])
+
+  // Handle buffer point selection from map click
+  const handleBufferPointSelect = useCallback((point: L.LatLng) => {
+    setFilters({
+      ...filters,
+      bufferCenter: point,
+      bufferRadius: 500,
+    })
+    exitMode() // Exit mode after selecting point
+  }, [filters, setFilters, exitMode])
+
+  // Handle Analyze Area button click
+  const handleAnalyzeAreaClick = useCallback(() => {
+    enterBufferMode()
+  }, [enterBufferMode])
 
   // Placeholder handlers for header buttons (implemented in later phases)
   const handleFilterClick = () => console.log('Filter clicked')
@@ -183,6 +200,7 @@ function App() {
         onBboxComplete={handleBboxComplete}
         onExitMode={exitMode}
         bufferResult={bufferResult || null}
+        onBufferPointSelect={handleBufferPointSelect}
       />
 
       {/* Header overlay at z-10, top */}
@@ -192,6 +210,7 @@ function App() {
         onStatsClick={handleStatsClick}
         onAddParcelClick={handleAddParcelClick}
         onDrawBoxClick={handleDrawBoxClick}
+        onAnalyzeAreaClick={handleAnalyzeAreaClick}
         showFilterBar={true}
         filterBarProps={{
           activeStatuses: filters.status,

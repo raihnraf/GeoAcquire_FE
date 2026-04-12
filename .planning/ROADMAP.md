@@ -8,7 +8,7 @@
 
 - [x] **Phase 1: Foundation** - Project setup, dependencies, base layout, and core infrastructure (Completed: 2026-04-12)
 - [x] **Phase 2: Map Core** - Interactive Leaflet map with parcel rendering and sidebar (Completed: 2026-04-12)
-- [ ] **Phase 3: CRUD Operations** - Create, edit, view, and delete parcels with forms
+- [x] **Phase 3: CRUD Operations** - Create, edit, view, and delete parcels with forms (completed 2026-04-12)
 - [ ] **Phase 4: Spatial Analysis** - Buffer analysis and bounding box filtering
 - [ ] **Phase 5: Import & Statistics** - GeoJSON import and area statistics dashboard
 - [ ] **Phase 6: Polish & Production** - Responsive design, pagination, and error handling
@@ -89,7 +89,7 @@
 - [x] 03-04-PLAN.md — DrawingPreview and MapView drawing integration (CRUD-01)
 - [x] 03-05-PLAN.md — ParcelSidebar view/edit/create modes (CRUD-03, CRUD-04)
 - [x] 03-06-PLAN.md — useUpdateParcel, useDeleteParcel hooks and DeleteConfirmModal (CRUD-04, CRUD-05, CRUD-08, CRUD-09)
-- [ ] 03-07-PLAN.md — DrawingToolbar and App-level workflow integration (CRUD-01, CRUD-03, CRUD-04, CRUD-05)
+- [x] 03-07-PLAN.md — DrawingToolbar and App-level workflow integration (CRUD-01, CRUD-03, CRUD-04, CRUD-05)
 
 **UI hint**: yes
 
@@ -171,7 +171,7 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-04-12 |
 | 2. Map Core | 5/5 | Complete | 2026-04-12 |
-| 3. CRUD Operations | 7/8 | In Progress|  |
+| 3. CRUD Operations | 8/8 | Complete   | 2026-04-12 |
 | 4. Spatial Analysis | 0/5 | Not started | - |
 | 5. Import & Statistics | 0/4 | Not started | - |
 | 6. Polish & Production | 0/4 | Not started | - |

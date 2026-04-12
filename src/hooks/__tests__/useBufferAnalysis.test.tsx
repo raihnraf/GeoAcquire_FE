@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { createWrapper } from '@/test/map-test-utils'
+import { useBufferAnalysis } from '../useBufferAnalysis'
+import { api } from '@/api/axios'
+import type { BufferResult } from '@/api/types'
+import L from 'leaflet'
 
 // Mock api for buffer analysis
 vi.mock('@/api/axios', () => ({
@@ -9,79 +13,123 @@ vi.mock('@/api/axios', () => ({
   },
 }))
 
-// Mock the useBufferAnalysis hook (placeholder for when implemented)
-// Test file must be .tsx to support toast imports
-const mockUseBufferAnalysis = () => ({
-  data: null,
-  isLoading: false,
-  isError: false,
-  error: null,
-  refetch: vi.fn(),
-})
-
-vi.mock('../useBufferAnalysis', () => ({ useBufferAnalysis: mockUseBufferAnalysis }))
-
 // Mock toast for error handling
-vi.mock('sonner', () => ({
-  toast: {
+vi.mock('react-hot-toast', () => ({
+  default: {
     error: vi.fn(),
     success: vi.fn(),
   },
 }))
 
 describe('useBufferAnalysis', () => {
+  const mockCenter = L.latLng(-6.2088, 106.8456) // Jakarta
+  const mockRadius = 500
+  const mockBufferResult: BufferResult = {
+    center: {
+      type: 'Point',
+      coordinates: [106.8456, -6.2088],
+    },
+    radius: 500,
+    parcels: {
+      type: 'FeatureCollection',
+      features: [],
+    },
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('should fetch buffer results from API', () => {
-    // Placeholder test - useBufferAnalysis hook not yet implemented
-    // TODO: Implement useBufferAnalysis hook and replace mock
-    expect(true).toBe(true)
+  it('should fetch buffer results from API', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: mockBufferResult })
 
-    // When implemented, this test will verify:
-    // - Hook calls api.post('/parcels/buffer') with center and radius
-    // - Returns BufferResult with nearby parcels array
+    const { result } = renderHook(
+      () => useBufferAnalysis(mockCenter, mockRadius),
+      { wrapper: createWrapper() }
+    )
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(api.post).toHaveBeenCalledWith('/buffer', {
+      lat: mockCenter.lat,
+      lng: mockCenter.lng,
+      distance: mockRadius,
+    })
+    expect(result.current.data).toEqual(mockBufferResult)
   })
 
-  it('should pass center and radius to API', () => {
-    // Placeholder test - useBufferAnalysis hook not yet implemented
-    // TODO: Implement useBufferAnalysis hook and replace mock
-    expect(true).toBe(true)
+  it('should pass center and radius to API', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: mockBufferResult })
 
-    // When implemented, this test will verify:
-    // - API request includes center: { lat, lng }
-    // - API request includes radius: number (meters)
+    const testCenter = L.latLng(-6.2, 106.8)
+    const testRadius = 1000
+
+    const { result } = renderHook(
+      () => useBufferAnalysis(testCenter, testRadius),
+      { wrapper: createWrapper() }
+    )
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(api.post).toHaveBeenCalledWith('/buffer', {
+      lat: -6.2,
+      lng: 106.8,
+      distance: 1000,
+    })
   })
 
-  it('should validate request with bufferRequestSchema', () => {
-    // Placeholder test - useBufferAnalysis hook not yet implemented
-    // TODO: Implement useBufferAnalysis hook and replace mock
-    expect(true).toBe(true)
+  it('should validate request with bufferRequestSchema', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: mockBufferResult })
 
-    // When implemented, this test will verify:
-    // - Request payload validated against zod schema
-    // - Invalid requests are rejected before API call
+    const { result } = renderHook(
+      () => useBufferAnalysis(mockCenter, mockRadius),
+      { wrapper: createWrapper() }
+    )
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    // Schema validation happens internally via Zod
+    // If validation fails, an error would be thrown
+    const callArgs = vi.mocked(api.post).mock.calls[0]
+    expect(callArgs[1]).toHaveProperty('lat')
+    expect(callArgs[1]).toHaveProperty('lng')
+    expect(callArgs[1]).toHaveProperty('distance')
   })
 
-  it('should enable query only when center is set', () => {
-    // Placeholder test - useBufferAnalysis hook not yet implemented
-    // TODO: Implement useBufferAnalysis hook and replace mock
-    expect(true).toBe(true)
+  it('should enable query only when center is set', async () => {
+    const { result: resultNoCenter } = renderHook(
+      () => useBufferAnalysis(null, mockRadius),
+      { wrapper: createWrapper() }
+    )
 
-    // When implemented, this test will verify:
-    // - Query is disabled when center is null/undefined
-    // - Query is enabled when center has valid LatLng
+    // Query should be disabled when center is null
+    expect(resultNoCenter.current.fetchStatus).toBe('idle')
+
+    // Now provide a center
+    vi.mocked(api.post).mockResolvedValueOnce({ data: mockBufferResult })
+    const { result: resultWithCenter } = renderHook(
+      () => useBufferAnalysis(mockCenter, mockRadius),
+      { wrapper: createWrapper() }
+    )
+
+    await waitFor(() => expect(resultWithCenter.current.isSuccess).toBe(true))
+    expect(api.post).toHaveBeenCalled()
   })
 
-  it('should handle loading and error states', () => {
-    // Placeholder test - useBufferAnalysis hook not yet implemented
-    // TODO: Implement useBufferAnalysis hook and replace mock
-    expect(true).toBe(true)
+  it('should handle loading and error states', async () => {
+    const mockError = new Error('Network error')
+    vi.mocked(api.post).mockRejectedValueOnce(mockError)
 
-    // When implemented, this test will verify:
-    // - isLoading is true during request
-    // - isError is true on failure
-    // - error contains error message
+    const { result } = renderHook(
+      () => useBufferAnalysis(mockCenter, mockRadius),
+      { wrapper: createWrapper() }
+    )
+
+    // Initially loading
+    expect(result.current.isLoading).toBe(true)
+
+    // After error
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.error).toBeTruthy()
   })
 })

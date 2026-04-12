@@ -65,3 +65,6 @@ export interface ImportResult {
     message: string
   }>
 }
+
+// Form data types (re-exported from zod for consistency)
+export type { ParcelFormData } from '@/lib/zod'

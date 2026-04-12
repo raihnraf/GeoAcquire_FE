@@ -3,21 +3,48 @@ import { MapView } from './components/map/MapView'
 import { MapHeader } from './components/map/MapHeader'
 import { MapStatusBar } from './components/map/MapStatusBar'
 import { ParcelSidebar } from './components/map/ParcelSidebar'
+import { DeleteConfirmModal } from './components/map/DeleteConfirmModal'
+import { DrawingToolbar } from './components/map/DrawingToolbar'
 import { useParcels } from './hooks/useParcels'
+import { useCreateParcel } from './hooks/useCreateParcel'
+import { useUpdateParcel } from './hooks/useUpdateParcel'
+import { useDeleteParcel } from './hooks/useDeleteParcel'
 import type { ParcelFeature } from './api/types'
+import type { ParcelFormData } from './lib/zod'
+import type { Polygon } from 'geojson'
+
+type SidebarMode = 'view' | 'edit' | 'create'
 
 function App() {
   const { data } = useParcels()
 
+  // Mutation hooks for CRUD operations
+  const createParcel = useCreateParcel()
+  const updateParcel = useUpdateParcel()
+  const deleteParcel = useDeleteParcel()
+
   // Selected parcel state for sidebar
   const [selectedParcel, setSelectedParcel] = useState<ParcelFeature | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [sidebarMode, setSidebarMode] = useState<SidebarMode>('view')
+
+  // Drawing state
+  const [isDrawingMode, setIsDrawingMode] = useState(false)
+  const [drawingPoints, setDrawingPoints] = useState<[number, number][]>([])
+
+  // Form state (for geometry from drawing)
+  const [formGeometry, setFormGeometry] = useState<Polygon | null>(null)
+
+  // Delete confirmation state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [parcelToDelete, setParcelToDelete] = useState<ParcelFeature | null>(null)
 
   // Handle parcel click from map
   const handleParcelClick = useCallback((id: number) => {
     const parcel = data?.features.find(f => f.properties?.id === id)
     if (parcel) {
       setSelectedParcel(parcel)
+      setSidebarMode('view')
       setIsSidebarOpen(true)
     }
   }, [data])
@@ -25,18 +52,81 @@ function App() {
   // Handle sidebar close
   const handleCloseSidebar = useCallback(() => {
     setIsSidebarOpen(false)
+    setFormGeometry(null)
   }, [])
+
+  // Handle Add Parcel button click - opens sidebar in create mode
+  const handleAddParcelClick = useCallback(() => {
+    setSelectedParcel(null)
+    setFormGeometry(null)
+    setDrawingPoints([])
+    setIsDrawingMode(true)
+    setIsSidebarOpen(true)
+    setSidebarMode('create')
+  }, [])
+
+  // Handle drawing completion
+  const handleDrawingComplete = useCallback((coordinates: number[][]) => {
+    setFormGeometry({ type: 'Polygon', coordinates: [coordinates] })
+    setIsDrawingMode(false)
+    setDrawingPoints([])
+  }, [])
+
+  // Handle drawing cancel
+  const handleDrawingCancel = useCallback(() => {
+    setIsDrawingMode(false)
+    setDrawingPoints([])
+    setFormGeometry(null)
+  }, [])
+
+  // Handle drawing point update (from DrawingHandler)
+  const handleDrawingPointAdd = useCallback((point: [number, number]) => {
+    setDrawingPoints((prev) => [...prev, point])
+  }, [])
+
+  // Handle create parcel submission
+  const handleCreateSubmit = useCallback(async (data: ParcelFormData) => {
+    const geometry = formGeometry || data.geometry
+    await createParcel.mutateAsync({ ...data, geometry })
+  }, [createParcel, formGeometry])
+
+  // Handle edit parcel submission
+  const handleEditSubmit = useCallback(async (id: number, data: ParcelFormData) => {
+    await updateParcel.mutateAsync({ id, data })
+  }, [updateParcel])
+
+  // Handle delete button click
+  const handleDeleteClick = useCallback(() => {
+    setParcelToDelete(selectedParcel)
+    setIsDeleteModalOpen(true)
+  }, [selectedParcel])
+
+  // Handle delete confirmation
+  const handleDeleteConfirm = useCallback(async () => {
+    if (parcelToDelete) {
+      await deleteParcel.mutateAsync(parcelToDelete.properties.id)
+      setIsDeleteModalOpen(false)
+      setParcelToDelete(null)
+      setIsSidebarOpen(false)
+      setSelectedParcel(null)
+    }
+  }, [deleteParcel, parcelToDelete])
 
   // Placeholder handlers for header buttons (implemented in later phases)
   const handleFilterClick = () => console.log('Filter clicked')
   const handleImportClick = () => console.log('Import clicked')
   const handleStatsClick = () => console.log('Stats clicked')
-  const handleAddParcelClick = () => console.log('Add parcel clicked')
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-slate-50">
       {/* Map layer at z-0 */}
-      <MapView onParcelClick={handleParcelClick} />
+      <MapView
+        onParcelClick={handleParcelClick}
+        isDrawingMode={isDrawingMode}
+        onDrawingComplete={handleDrawingComplete}
+        onDrawingCancel={handleDrawingCancel}
+        drawingPoints={drawingPoints}
+      />
 
       {/* Header overlay at z-10, top */}
       <MapHeader
@@ -49,11 +139,44 @@ function App() {
       {/* Status bar overlay at z-10, bottom */}
       <MapStatusBar data={data || null} />
 
+      {/* Drawing toolbar overlay at z-[1001], bottom-right */}
+      {isDrawingMode && (
+        <div className="fixed bottom-6 right-6 z-[1001]">
+          <DrawingToolbar
+            onCancel={handleDrawingCancel}
+            onComplete={() => {
+              // Close polygon by adding first point at the end
+              if (drawingPoints.length >= 3) {
+                const closedPoints = [...drawingPoints, drawingPoints[0]]
+                handleDrawingComplete(closedPoints)
+              }
+            }}
+            canComplete={drawingPoints.length >= 3}
+          />
+        </div>
+      )}
+
       {/* Sidebar overlay at z-20, right */}
       <ParcelSidebar
         parcel={selectedParcel}
         isOpen={isSidebarOpen}
         onClose={handleCloseSidebar}
+        mode={sidebarMode}
+        onModeChange={setSidebarMode}
+        onEditSubmit={handleEditSubmit}
+        onCreateSubmit={handleCreateSubmit}
+        onDelete={handleDeleteClick}
+      />
+
+      {/* Delete confirmation modal overlay at z-30 */}
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setParcelToDelete(null)
+        }}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={deleteParcel.isPending}
       />
     </div>
   )

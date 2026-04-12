@@ -1,31 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { renderWithMapContext } from '@/test/map-test-utils'
+import { ModeBadge } from '../ModeBadge'
+import type { MapMode } from '@/hooks/useMapMode'
 
-// Mock lucide-react icons
-vi.mock('lucide-react', () => ({
-  BoxSelect: () => <div data-testid="box-select-icon" />,
-  Target: () => <div data-testid="target-icon" />,
-  X: () => <div data-testid="x-icon" />,
-}))
-
-// Mock the ModeBadge component (placeholder for when implemented)
-const mockModeBadge = ({ mode, onExit }: any) => {
-  if (mode === 'normal') return null
-
-  const modeText = mode === 'bbox' ? 'Drawing Box' : 'Select Center'
-  const Icon = mode === 'bbox' ? 'box-select-icon' : 'target-icon'
-
-  return (
-    <div data-testid="mode-badge">
-      <span data-testid={Icon} />
-      <span>{modeText}</span>
-      <button onClick={onExit}>Exit</button>
-    </div>
-  )
-}
-
-vi.mock('../ModeBadge', () => ({ ModeBadge: mockModeBadge }))
+const mockOnExit = vi.fn()
 
 describe('ModeBadge', () => {
   beforeEach(() => {
@@ -33,61 +11,73 @@ describe('ModeBadge', () => {
   })
 
   it('should render mode name with icon', () => {
-    // Placeholder test - ModeBadge component not yet implemented
-    // TODO: Implement ModeBadge component and replace mock
-    expect(true).toBe(true)
+    render(<ModeBadge mode="bbox" onExit={mockOnExit} />)
 
-    // When implemented, this test will verify:
-    // - Mode name text renders
-    // - Appropriate icon renders for current mode
+    expect(screen.getByText('Drawing Box')).toBeInTheDocument()
   })
 
   it('should show correct text for bbox mode (Drawing Box)', () => {
-    // Placeholder test - ModeBadge component not yet implemented
-    // TODO: Implement ModeBadge component and replace mock
-    expect(true).toBe(true)
+    render(<ModeBadge mode="bbox" onExit={mockOnExit} />)
 
-    // When implemented, this test will verify:
-    // - Text reads "Drawing Box" when mode='bbox'
-    // - BoxSelect icon renders
+    expect(screen.getByText('Drawing Box')).toBeInTheDocument()
+    expect(screen.getByLabelText('Exit mode')).toBeInTheDocument()
   })
 
   it('should show correct text for buffer mode (Select Center)', () => {
-    // Placeholder test - ModeBadge component not yet implemented
-    // TODO: Implement ModeBadge component and replace mock
-    expect(true).toBe(true)
+    render(<ModeBadge mode="buffer-point" onExit={mockOnExit} />)
 
-    // When implemented, this test will verify:
-    // - Text reads "Select Center" when mode='buffer'
-    // - Target icon renders
+    expect(screen.getByText('Select Center')).toBeInTheDocument()
   })
 
   it('should render exit mode button (X icon)', () => {
-    // Placeholder test - ModeBadge component not yet implemented
-    // TODO: Implement ModeBadge component and replace mock
-    expect(true).toBe(true)
+    render(<ModeBadge mode="bbox" onExit={mockOnExit} />)
 
-    // When implemented, this test will verify:
-    // - Exit button renders with X icon
-    // - Button is clickable
+    const exitButton = screen.getByLabelText('Exit mode')
+    expect(exitButton).toBeInTheDocument()
   })
 
   it('should call onExit when exit button clicked', () => {
-    // Placeholder test - ModeBadge component not yet implemented
-    // TODO: Implement ModeBadge component and replace mock
-    expect(true).toBe(true)
+    render(<ModeBadge mode="bbox" onExit={mockOnExit} />)
 
-    // When implemented, this test will verify:
-    // - Clicking exit button calls onExit callback
+    const exitButton = screen.getByLabelText('Exit mode')
+    fireEvent.click(exitButton)
+
+    expect(mockOnExit).toHaveBeenCalledTimes(1)
   })
 
   it('should hide when mode is normal', () => {
-    // Placeholder test - ModeBadge component not yet implemented
-    // TODO: Implement ModeBadge component and replace mock
-    expect(true).toBe(true)
+    const { container } = render(<ModeBadge mode="normal" onExit={mockOnExit} />)
 
-    // When implemented, this test will verify:
-    // - Component returns null when mode='normal'
-    // - Nothing renders to DOM
+    expect(container.firstChild).toBe(null)
+  })
+
+  it('should have correct z-index for positioning below header', () => {
+    const { container } = render(<ModeBadge mode="bbox" onExit={mockOnExit} />)
+
+    const badge = container.querySelector('.z-15')
+    expect(badge).toBeInTheDocument()
+  })
+
+  it('should have absolute positioning at top-left', () => {
+    const { container } = render(<ModeBadge mode="bbox" onExit={mockOnExit} />)
+
+    const badge = container.querySelector('.absolute.top-4.left-4')
+    expect(badge).toBeInTheDocument()
+  })
+
+  it('should render BoxSelect icon for bbox mode', () => {
+    const { container } = render(<ModeBadge mode="bbox" onExit={mockOnExit} />)
+
+    // Check for the lucide-square-dashed class (BoxSelect icon in lucide-react)
+    const icon = container.querySelector('.lucide-square-dashed')
+    expect(icon).toBeInTheDocument()
+  })
+
+  it('should render Target icon for buffer mode', () => {
+    const { container } = render(<ModeBadge mode="buffer-point" onExit={mockOnExit} />)
+
+    // Check for the lucide-target class
+    const icon = container.querySelector('.lucide-target')
+    expect(icon).toBeInTheDocument()
   })
 })

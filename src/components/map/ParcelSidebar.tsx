@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Edit, Trash, X } from 'lucide-react'
-import type { ParcelFeature } from '@/api/types'
+import { Edit, Trash, X, Radio } from 'lucide-react'
+import type { ParcelFeature, BufferResult } from '@/api/types'
 import { formatArea, formatPrice, formatDate, getParcelColor } from '@/lib/utils'
 import { ParcelForm } from './ParcelForm'
 import type { ParcelFormData } from '@/lib/zod'
 
-type SidebarMode = 'view' | 'edit' | 'create'
+type SidebarMode = 'view' | 'edit' | 'create' | 'buffer'
 
 interface ParcelSidebarProps {
   parcel: ParcelFeature | null
@@ -16,6 +16,9 @@ interface ParcelSidebarProps {
   onDelete?: () => void
   onEditSubmit?: (id: number, data: ParcelFormData) => Promise<void>
   onCreateSubmit?: (data: ParcelFormData) => Promise<void>
+  bufferResult?: BufferResult | null
+  onBufferStart?: () => void
+  onParcelClick?: (id: number) => void
 }
 
 const DEFAULT_CREATE_VALUES: ParcelFormData = {
@@ -34,6 +37,9 @@ export function ParcelSidebar({
   onDelete,
   onEditSubmit,
   onCreateSubmit,
+  bufferResult,
+  onBufferStart,
+  onParcelClick,
 }: ParcelSidebarProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -48,7 +54,7 @@ export function ParcelSidebar({
           owner_name: parcel!.properties.owner_name,
           status: parcel!.properties.status,
           price_per_sqm: parcel!.properties.price_per_sqm ?? undefined,
-          geometry: parcel!.geometry,
+          geometry: parcel!.geometry as typeof DEFAULT_CREATE_VALUES.geometry,
         }
 
   // Handle edit submission
@@ -170,7 +176,7 @@ export function ParcelSidebar({
           </div>
 
           {/* Updated date */}
-          <div>
+          <div className="mb-4">
             <label className="mb-1 block text-sm font-medium text-slate-700">
               Last Updated
             </label>
@@ -178,6 +184,18 @@ export function ParcelSidebar({
               {formatDate(properties.updated_at)}
             </p>
           </div>
+
+          {/* Analyze Nearby button */}
+          {onBufferStart && (
+            <button
+              onClick={onBufferStart}
+              className="w-full bg-blue-500 text-white hover:bg-blue-600 rounded-md py-2 text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+              aria-label="Analyze nearby parcels"
+            >
+              <Radio className="h-4 w-4" />
+              Analyze Nearby
+            </button>
+          )}
         </div>
       </aside>
     )
@@ -243,6 +261,92 @@ export function ParcelSidebar({
               onCancel={onClose}
               isSubmitting={isSubmitting}
             />
+          </div>
+        </div>
+      </aside>
+    )
+  }
+
+  // Buffer mode - shows nearby parcels results
+  if (mode === 'buffer') {
+    const parcelCount = bufferResult?.parcels.features.length ?? 0
+    const radius = bufferResult?.radius ?? 0
+
+    return (
+      <aside
+        className={`fixed top-0 right-0 bottom-0 z-20 w-80 bg-white shadow-xl transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex h-full flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Nearby Parcels</h2>
+              <p className="text-sm text-slate-600">
+                {parcelCount} {parcelCount === 1 ? 'parcel' : 'parcels'} within {radius}m
+              </p>
+            </div>
+            <button
+              onClick={() => onModeChange?.('view')}
+              className="rounded p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Close buffer results"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Results list */}
+          <div className="flex-1 overflow-y-auto">
+            {parcelCount === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center">
+                <Radio className="h-12 w-12 text-slate-400 mb-3" />
+                <h3 className="text-base font-semibold text-slate-700 mb-1">
+                  No parcels found
+                </h3>
+                <p className="text-sm text-slate-500">
+                  No parcels within the specified buffer radius. Try increasing the radius.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {bufferResult?.parcels.features.map((feature) => {
+                  const props = feature.properties
+
+                  return (
+                    <button
+                      key={props.id}
+                      onClick={() => onParcelClick?.(props.id)}
+                      className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors focus:outline-none focus:bg-slate-50"
+                      aria-label={`View parcel ${props.id}`}
+                    >
+                      {/* Owner name */}
+                      <p className="text-sm font-medium text-slate-900 mb-1">
+                        {props.owner_name}
+                      </p>
+
+                      {/* Status badge */}
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                          props.status === 'free'
+                            ? 'bg-green-100 text-green-700'
+                            : props.status === 'negotiating'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                        }`}
+                      >
+                        {props.status.charAt(0).toUpperCase() + props.status.slice(1)}
+                      </span>
+
+                      {/* Area */}
+                      <p className="text-xs text-slate-500 mt-1">
+                        {formatArea(props.area_sqm)}
+                      </p>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
       </aside>

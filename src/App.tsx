@@ -15,7 +15,7 @@ import type { ParcelFeature, ParcelStatus } from './api/types'
 import type { ParcelFormData } from './lib/zod'
 import type { Polygon } from 'geojson'
 
-type SidebarMode = 'view' | 'edit' | 'create'
+type SidebarMode = 'view' | 'edit' | 'create' | 'buffer'
 
 function App() {
   const { data } = useParcels()
@@ -46,6 +46,9 @@ function App() {
   // Delete confirmation state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [parcelToDelete, setParcelToDelete] = useState<ParcelFeature | null>(null)
+
+  // Buffer analysis state
+  const [bufferResult] = useState<import('./api/types').BufferResult | null>(null)
 
   // Handle parcel click from map
   const handleParcelClick = useCallback((id: number) => {
@@ -134,6 +137,11 @@ function App() {
     exitMode()
   }, [filters, setFilters, exitMode])
 
+  // Handle buffer analysis start - switches sidebar to buffer mode
+  const handleBufferStart = useCallback(() => {
+    setSidebarMode('buffer')
+  }, [])
+
   // Handle Draw Box button click
   const handleDrawBoxClick = useCallback(() => {
     enterBboxMode()
@@ -203,6 +211,9 @@ function App() {
         onEditSubmit={handleEditSubmit}
         onCreateSubmit={handleCreateSubmit}
         onDelete={handleDeleteClick}
+        bufferResult={bufferResult}
+        onBufferStart={handleBufferStart}
+        onParcelClick={handleParcelClick}
       />
 
       {/* Delete confirmation modal overlay at z-30 */}

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
-import L from 'leaflet'
-import { parseBbox, parseStatus, buildUrlParams, type FilterState } from '@/lib/url-utils'
-import type { ParcelStatus } from '@/api/types'
+import { parseBbox, parseStatus, parseBuffer, buildUrlParams, type FilterState } from '@/lib/url-utils'
 
 const DEFAULT_FILTERS: FilterState = {
   status: [],
   bbox: null,
   selected: null,
+  bufferCenter: null,
+  bufferRadius: 500,
 }
 
 /**
@@ -23,18 +23,29 @@ export function useFilterParams() {
     const statusParam = params.get('status')
     const bboxParam = params.get('bbox')
     const selectedParam = params.get('selected')
+    const bufferParam = params.get('buffer')
 
     const parsedFilters: FilterState = {
       status: parseStatus(statusParam),
       bbox: parseBbox(bboxParam),
       selected: selectedParam ? parseInt(selectedParam, 10) : null,
+      bufferCenter: null,
+      bufferRadius: 500,
+    }
+
+    // Parse buffer parameter if present
+    const bufferResult = parseBuffer(bufferParam)
+    if (bufferResult) {
+      parsedFilters.bufferCenter = bufferResult.bufferCenter
+      parsedFilters.bufferRadius = bufferResult.bufferRadius
     }
 
     // Only update if parsed values differ from defaults
     if (
       parsedFilters.status.length > 0 ||
       parsedFilters.bbox !== null ||
-      parsedFilters.selected !== null
+      parsedFilters.selected !== null ||
+      parsedFilters.bufferCenter !== null
     ) {
       setFilters(parsedFilters)
     }
@@ -50,6 +61,8 @@ export function useFilterParams() {
   // Clear all filters
   const clearFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS)
+    // Clear URL params
+    window.history.replaceState({}, '', window.location.pathname)
   }, [])
 
   return {

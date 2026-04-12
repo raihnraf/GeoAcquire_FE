@@ -14,11 +14,24 @@ vi.mock('@/lib/url-utils', () => ({
     if (!bbox) return null
     return { toBBoxString: () => bbox }
   }),
+  parseBuffer: vi.fn((buffer: string | null) => {
+    if (!buffer) return null
+    const [centerStr, radiusStr] = buffer.split(':')
+    const [lat, lng] = centerStr.split(',').map(Number)
+    return {
+      bufferCenter: { lat, lng },
+      bufferRadius: parseInt(radiusStr, 10),
+    }
+  }),
   buildUrlParams: vi.fn((filters: any) => {
     const params = new URLSearchParams()
     if (filters.status?.length) params.set('status', filters.status.join(','))
     if (filters.bbox) params.set('bbox', filters.bbox.toBBoxString())
     if (filters.selected) params.set('selected', String(filters.selected))
+    if (filters.bufferCenter) {
+      const { lat, lng } = filters.bufferCenter
+      params.set('buffer', `${lat},${lng}:${filters.bufferRadius}`)
+    }
     return params
   }),
 }))
@@ -27,8 +40,10 @@ vi.mock('@/lib/url-utils', () => ({
 vi.mock('leaflet', () => ({
   default: {
     latLngBounds: vi.fn(),
+    latLng: vi.fn((lat: number, lng: number) => ({ lat, lng })),
   },
   latLngBounds: vi.fn(),
+  latLng: vi.fn((lat: number, lng: number) => ({ lat, lng })),
 }))
 
 // Mock window.location.search
@@ -67,6 +82,8 @@ describe('useFilterParams', () => {
     expect(result.current.filters.status).toEqual([])
     expect(result.current.filters.bbox).toBeNull()
     expect(result.current.filters.selected).toBeNull()
+    expect(result.current.filters.bufferCenter).toBeNull()
+    expect(result.current.filters.bufferRadius).toBe(500)
   })
 
   it('should parse status from URL params on mount', () => {
@@ -94,13 +111,15 @@ describe('useFilterParams', () => {
   })
 
   it('should parse all params from URL on mount', () => {
-    mockLocation.search = '?status=free,negotiating,target&bbox=106.8,-6.2,106.9,-6.1&selected=456'
+    mockLocation.search = '?status=free,negotiating,target&bbox=106.8,-6.2,106.9,-6.1&selected=456&buffer=-6.2,106.8:500'
 
     const { result } = renderHook(() => useFilterParams(), { wrapper })
 
     expect(result.current.filters.status).toEqual(['free', 'negotiating', 'target'])
     expect(result.current.filters.bbox).not.toBeNull()
     expect(result.current.filters.selected).toBe(456)
+    expect(result.current.filters.bufferCenter).not.toBeNull()
+    expect(result.current.filters.bufferRadius).toBe(500)
   })
 
   it('should update URL when filters change', async () => {
@@ -135,6 +154,8 @@ describe('useFilterParams', () => {
     await waitFor(() => {
       expect(result.current.filters.status).toEqual([])
       expect(result.current.filters.selected).toBeNull()
+      expect(result.current.filters.bufferCenter).toBeNull()
+      expect(mockReplaceState).toHaveBeenCalledWith({}, '', window.location.pathname)
     })
   })
 
@@ -148,5 +169,53 @@ describe('useFilterParams', () => {
     const { result } = renderHook(() => useFilterParams(), { wrapper })
 
     expect(typeof result.current.clearFilters).toBe('function')
+  })
+
+  it('should parse buffer parameter from URL params on mount', () => {
+    mockLocation.search = '?buffer=-6.2,106.8:500'
+
+    const { result } = renderHook(() => useFilterParams(), { wrapper })
+
+    expect(result.current.filters.bufferCenter).not.toBeNull()
+    expect(result.current.filters.bufferRadius).toBe(500)
+  })
+
+  it('should include buffer in URL when buffer state changes', async () => {
+    mockLocation.search = ''
+
+    const { result } = renderHook(() => useFilterParams(), { wrapper })
+
+    act(() => {
+      result.current.setFilters({
+        status: [],
+        bbox: null,
+        selected: null,
+        bufferCenter: { lat: -6.2, lng: 106.8 },
+        bufferRadius: 1000,
+      })
+    })
+
+    await waitFor(() => {
+      expect(mockReplaceState).toHaveBeenCalled()
+    })
+  })
+
+  it('should clear all filters including buffer state', async () => {
+    mockLocation.search = '?status=free&buffer=-6.2,106.8:500'
+
+    const { result } = renderHook(() => useFilterParams(), { wrapper })
+
+    expect(result.current.filters.status).toEqual(['free'])
+    expect(result.current.filters.bufferCenter).not.toBeNull()
+
+    act(() => {
+      result.current.clearFilters()
+    })
+
+    await waitFor(() => {
+      expect(result.current.filters.status).toEqual([])
+      expect(result.current.filters.bufferCenter).toBeNull()
+      expect(result.current.filters.bufferRadius).toBe(500) // Reset to default
+    })
   })
 })

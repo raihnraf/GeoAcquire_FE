@@ -8,6 +8,8 @@ export interface FilterState {
   status: ParcelStatus[]
   bbox: L.LatLngBounds | null
   selected: number | null
+  bufferCenter: L.LatLng | null
+  bufferRadius: number
 }
 
 /**
@@ -71,6 +73,53 @@ export function parseBbox(bboxParam: string | null): L.LatLngBounds | null {
 }
 
 /**
+ * Parse buffer parameter from URL
+ * @param bufferParam - Buffer string "lat,lng:radius" or null
+ * @returns Object with bufferCenter and bufferRadius, or null if invalid
+ */
+export function parseBuffer(
+  bufferParam: string | null
+): { bufferCenter: L.LatLng; bufferRadius: number } | null {
+  if (!bufferParam) {
+    return null
+  }
+
+  const parts = bufferParam.split(':')
+  if (parts.length !== 2) {
+    return null
+  }
+
+  const [centerStr, radiusStr] = parts
+  const centerParts = centerStr.split(',')
+
+  if (centerParts.length !== 2) {
+    return null
+  }
+
+  const [lat, lng] = centerParts.map(v => parseFloat(v))
+  const radius = parseInt(radiusStr, 10)
+
+  // Validate all values are valid numbers
+  if (isNaN(lat) || isNaN(lng) || isNaN(radius)) {
+    return null
+  }
+
+  // Validate radius is within reasonable bounds (1-10000 meters)
+  if (radius < 1 || radius > 10000) {
+    return null
+  }
+
+  try {
+    return {
+      bufferCenter: L.latLng(lat, lng),
+      bufferRadius: radius,
+    }
+  } catch {
+    return null
+  }
+}
+
+/**
  * Build URLSearchParams from filter state
  * @param filters - Current filter state
  * @returns URLSearchParams instance
@@ -89,6 +138,11 @@ export function buildUrlParams(filters: FilterState): URLSearchParams {
 
   if (filters.selected !== null) {
     params.set('selected', String(filters.selected))
+  }
+
+  if (filters.bufferCenter) {
+    const { lat, lng } = filters.bufferCenter
+    params.set('buffer', `${lat},${lng}:${filters.bufferRadius}`)
   }
 
   return params

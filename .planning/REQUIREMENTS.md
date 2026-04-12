@@ -33,8 +33,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CRUD-01**: User can create parcel by drawing polygon on map
 - [x] **CRUD-02**: User can create parcel by filling form (owner_name, status, price_per_sqm)
 - [ ] **CRUD-03**: User can view parcel details in sidebar when clicked
-- [ ] **CRUD-04**: User can edit parcel fields and geometry
-- [ ] **CRUD-05**: User can delete parcel with confirmation dialog
+- [x] **CRUD-04**: User can edit parcel fields and geometry
+- [x] **CRUD-05**: User can delete parcel with confirmation dialog
 - [x] **CRUD-06**: Form validation mirrors backend rules (Zod)
 - [ ] **CRUD-07**: Backend 422 errors mapped to form fields inline
 - [x] **CRUD-08**: Success/error toasts on mutation outcomes
@@ -126,8 +126,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CRUD-01 | Phase 3 | Complete |
 | CRUD-02 | Phase 3 | Complete |
 | CRUD-03 | Phase 3 | Pending |
-| CRUD-04 | Phase 3 | Pending |
-| CRUD-05 | Phase 3 | Pending |
+| CRUD-04 | Phase 3 | Complete |
+| CRUD-05 | Phase 3 | Complete |
 | CRUD-06 | Phase 3 | Complete |
 | CRUD-07 | Phase 3 | Pending |
 | CRUD-08 | Phase 3 | Complete |

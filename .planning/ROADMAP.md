@@ -80,9 +80,10 @@
 7. Toast notifications appear for successful and failed operations
 8. Map refreshes automatically after any create/update/delete operation
 
-**Plans**: 7 plans
+**Plans**: 8 plans
 
-- [ ] 03-01-PLAN.md — Form validation and API error handling (CRUD-06, CRUD-07)
+- [x] 03-00-PLAN.md — Wave 0: Test infrastructure setup (all test stubs)
+- [x] 03-01-PLAN.md — Form validation and API error handling (CRUD-06, CRUD-07)
 - [ ] 03-02-PLAN.md — FormField and ParcelForm components (CRUD-02)
 - [ ] 03-03-PLAN.md — useCreateParcel hook and DrawingHandler (CRUD-01, CRUD-08, CRUD-09)
 - [ ] 03-04-PLAN.md — DrawingPreview and MapView drawing integration (CRUD-01)
@@ -170,7 +171,7 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-04-12 |
 | 2. Map Core | 5/5 | Complete | 2026-04-12 |
-| 3. CRUD Operations | 0/7 | Not started | - |
+| 3. CRUD Operations | 2/8 | In Progress|  |
 | 4. Spatial Analysis | 0/5 | Not started | - |
 | 5. Import & Statistics | 0/4 | Not started | - |
 | 6. Polish & Production | 0/4 | Not started | - |

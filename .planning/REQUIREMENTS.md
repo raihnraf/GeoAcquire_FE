@@ -42,10 +42,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Filtering & Search
 
-- [ ] **FLT-01**: User can filter parcels by status (free/negotiating/target)
+- [x] **FLT-01**: User can filter parcels by status (free/negotiating/target)
 - [ ] **FLT-02**: User can draw bounding box to filter parcels within
-- [ ] **FLT-03**: URL search params sync (?status, ?bbox, ?selected)
-- [ ] **FLT-04**: Shareable links work via URL params
+- [x] **FLT-03**: URL search params sync (?status, ?bbox, ?selected)
+- [x] **FLT-04**: Shareable links work via URL params
 - [ ] **FLT-05**: Clear filters resets to show all parcels
 
 ### Spatial Analysis
@@ -132,10 +132,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CRUD-07 | Phase 3 | Pending |
 | CRUD-08 | Phase 3 | Complete |
 | CRUD-09 | Phase 3 | Complete |
-| FLT-01 | Phase 4 | Pending |
+| FLT-01 | Phase 4 | Complete |
 | FLT-02 | Phase 4 | Pending |
-| FLT-03 | Phase 4 | Pending |
-| FLT-04 | Phase 4 | Pending |
+| FLT-03 | Phase 4 | Complete |
+| FLT-04 | Phase 4 | Complete |
 | FLT-05 | Phase 4 | Pending |
 | ANA-01 | Phase 4 | Pending |
 | ANA-02 | Phase 4 | Pending |

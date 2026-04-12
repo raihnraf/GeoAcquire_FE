@@ -119,7 +119,7 @@
 **Plans**: 6 plans
 
 - [x] 04-00-PLAN.md — Wave 0: Test infrastructure setup (test stubs for Phase 4)
-- [ ] 04-01-PLAN.md — FilterBar component and URL parameter synchronization (FLT-01, FLT-03, FLT-04)
+- [x] 04-01-PLAN.md — FilterBar component and URL parameter synchronization (FLT-01, FLT-03, FLT-04)
 - [ ] 04-02-PLAN.md — BBox drawing mode, useMapMode hook, ModeBadge component (FLT-02, FLT-05)
 - [ ] 04-03-PLAN.md — Buffer analysis hook and BufferPanel component (ANA-01, ANA-02, ANA-03, ANA-06)
 - [ ] 04-04-PLAN.md — Buffer visualization with circle and parcel highlighting (ANA-04, ANA-05)
@@ -180,7 +180,7 @@
 | 1. Foundation | 5/5 | Complete | 2026-04-12 |
 | 2. Map Core | 5/5 | Complete | 2026-04-12 |
 | 3. CRUD Operations | 8/8 | Complete   | 2026-04-12 |
-| 4. Spatial Analysis | 0/6 | Not started | - |
+| 4. Spatial Analysis | 2/6 | In Progress|  |
 | 5. Import & Statistics | 0/4 | Not started | - |
 | 6. Polish & Production | 0/4 | Not started | - |
 

@@ -11,9 +11,11 @@ import { useUpdateParcel } from './hooks/useUpdateParcel'
 import { useDeleteParcel } from './hooks/useDeleteParcel'
 import { useFilterParams } from './hooks/useFilterParams'
 import { useMapMode } from './hooks/useMapMode'
+import { useBufferAnalysis } from './hooks/useBufferAnalysis'
 import type { ParcelFeature, ParcelStatus } from './api/types'
 import type { ParcelFormData } from './lib/zod'
 import type { Polygon } from 'geojson'
+import L from 'leaflet'
 
 type SidebarMode = 'view' | 'edit' | 'create' | 'buffer'
 
@@ -48,7 +50,11 @@ function App() {
   const [parcelToDelete, setParcelToDelete] = useState<ParcelFeature | null>(null)
 
   // Buffer analysis state
-  const [bufferResult] = useState<import('./api/types').BufferResult | null>(null)
+  const [bufferCenter, setBufferCenter] = useState<L.LatLng | null>(null)
+  const [bufferRadius, setBufferRadius] = useState(500)
+
+  // Buffer analysis hook
+  const { data: bufferResult } = useBufferAnalysis(bufferCenter, bufferRadius)
 
   // Handle parcel click from map
   const handleParcelClick = useCallback((id: number) => {
@@ -139,7 +145,19 @@ function App() {
 
   // Handle buffer analysis start - switches sidebar to buffer mode
   const handleBufferStart = useCallback(() => {
+    // Set buffer center from selected parcel geometry
+    if (selectedParcel) {
+      const coords = selectedParcel.geometry.coordinates[0][0]
+      setBufferCenter(L.latLng(coords[1], coords[0]))
+      setBufferRadius(500)
+    }
     setSidebarMode('buffer')
+  }, [selectedParcel])
+
+  // Handle buffer apply - sets the center and radius for analysis
+  const handleBufferApply = useCallback((radius: number) => {
+    setBufferRadius(radius)
+    // bufferCenter should already be set from parcel selection
   }, [])
 
   // Handle Draw Box button click
@@ -164,6 +182,7 @@ function App() {
         mode={mode}
         onBboxComplete={handleBboxComplete}
         onExitMode={exitMode}
+        bufferResult={bufferResult || null}
       />
 
       {/* Header overlay at z-10, top */}
@@ -213,6 +232,7 @@ function App() {
         onDelete={handleDeleteClick}
         bufferResult={bufferResult}
         onBufferStart={handleBufferStart}
+        onBufferApply={handleBufferApply}
         onParcelClick={handleParcelClick}
       />
 

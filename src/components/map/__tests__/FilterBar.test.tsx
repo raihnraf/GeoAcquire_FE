@@ -1,66 +1,143 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { renderWithMapContext } from '@/test/map-test-utils'
+import { FilterBar } from '@/components/map/FilterBar'
+import type { ParcelStatus } from '@/api/types'
 
-// Mock the FilterBar component (placeholder for when implemented)
-// This mock will be replaced by the actual component implementation
-const mockFilterBar = ({ activeFilters, onFilterChange, onClearFilters }: any) => (
-  <div data-testid="filter-bar">
-    <button onClick={() => onFilterChange([...activeFilters, 'free'])}>Free</button>
-    <button onClick={() => onFilterChange([...activeFilters, 'negotiating'])}>Negotiating</button>
-    <button onClick={() => onFilterChange([...activeFilters, 'target'])}>Target</button>
-    {activeFilters.length > 0 && (
-      <button onClick={onClearFilters}>Clear Filters</button>
-    )}
-  </div>
-)
+// Mock lucide-react icons
+vi.mock('lucide-react', () => ({
+  Filter: ({ className }: { className: string }) => (
+    <svg data-testid="filter-icon" className={className} />
+  ),
+  X: ({ className }: { className: string }) => (
+    <svg data-testid="x-icon" className={className} />
+  ),
+}))
 
-vi.mock('../FilterBar', () => ({ FilterBar: mockFilterBar }))
+// Mock cn utility
+vi.mock('@/lib/utils', () => ({
+  cn: (...classes: (string | undefined | null | false)[]) => {
+    return classes.filter(Boolean).join(' ')
+  },
+}))
 
 describe('FilterBar', () => {
+  let mockOnStatusToggle: ReturnType<typeof vi.fn>
+  let mockOnClear: ReturnType<typeof vi.fn>
+
   beforeEach(() => {
-    vi.clearAllMocks()
+    mockOnStatusToggle = vi.fn()
+    mockOnClear = vi.fn()
   })
 
   it('should render status filter buttons (Free, Negotiating, Target)', () => {
-    // Placeholder test - FilterBar component not yet implemented
-    // TODO: Implement FilterBar component and replace mock
-    expect(true).toBe(true)
+    render(
+      <FilterBar
+        activeStatuses={[]}
+        onStatusToggle={mockOnStatusToggle}
+        onClear={mockOnClear}
+      />
+    )
 
-    // When implemented, this test will verify:
-    // - Free button renders
-    // - Negotiating button renders
-    // - Target button renders
+    expect(screen.getByRole('button', { name: /filter by free/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /filter by negotiating/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /filter by target/i })).toBeInTheDocument()
   })
 
   it('should toggle status filters on button click', () => {
-    // Placeholder test - FilterBar component not yet implemented
-    // TODO: Implement FilterBar component and replace mock
-    expect(true).toBe(true)
+    const { rerender } = render(
+      <FilterBar
+        activeStatuses={[]}
+        onStatusToggle={mockOnStatusToggle}
+        onClear={mockOnClear}
+      />
+    )
 
-    // When implemented, this test will verify:
-    // - Clicking Free button adds 'free' to activeFilters
-    // - Clicking Negotiating button adds 'negotiating' to activeFilters
-    // - Clicking Target button adds 'target' to activeFilters
+    // Click Free button
+    fireEvent.click(screen.getByRole('button', { name: /filter by free/i }))
+    expect(mockOnStatusToggle).toHaveBeenCalledWith('free')
+
+    // Click Negotiating button
+    fireEvent.click(screen.getByRole('button', { name: /filter by negotiating/i }))
+    expect(mockOnStatusToggle).toHaveBeenCalledWith('negotiating')
+
+    // Click Target button
+    fireEvent.click(screen.getByRole('button', { name: /filter by target/i }))
+    expect(mockOnStatusToggle).toHaveBeenCalledWith('target')
   })
 
   it('should show Clear Filters button when filters are active', () => {
-    // Placeholder test - FilterBar component not yet implemented
-    // TODO: Implement FilterBar component and replace mock
-    expect(true).toBe(true)
+    const { rerender } = render(
+      <FilterBar
+        activeStatuses={[]}
+        onStatusToggle={mockOnStatusToggle}
+        onClear={mockOnClear}
+      />
+    )
 
-    // When implemented, this test will verify:
-    // - Clear Filters button appears when activeFilters.length > 0
-    // - Clear Filters button is hidden when activeFilters.length === 0
+    // No active filters - Clear button should not be visible
+    expect(screen.queryByRole('button', { name: /clear all filters/i })).not.toBeInTheDocument()
+
+    // With active filters
+    rerender(
+      <FilterBar
+        activeStatuses={['free']}
+        onStatusToggle={mockOnStatusToggle}
+        onClear={mockOnClear}
+      />
+    )
+
+    // Clear button should be visible
+    expect(screen.getByRole('button', { name: /clear all filters/i })).toBeInTheDocument()
   })
 
   it('should clear all filters on Clear button click', () => {
-    // Placeholder test - FilterBar component not yet implemented
-    // TODO: Implement FilterBar component and replace mock
-    expect(true).toBe(true)
+    render(
+      <FilterBar
+        activeStatuses={['free', 'negotiating']}
+        onStatusToggle={mockOnStatusToggle}
+        onClear={mockOnClear}
+      />
+    )
 
-    // When implemented, this test will verify:
-    // - Clicking Clear Filters calls onClearFilters callback
-    // - All active filters are removed
+    fireEvent.click(screen.getByRole('button', { name: /clear all filters/i }))
+    expect(mockOnClear).toHaveBeenCalled()
+  })
+
+  it('should mark active status buttons with aria-pressed', () => {
+    render(
+      <FilterBar
+        activeStatuses={['free', 'target']}
+        onStatusToggle={mockOnStatusToggle}
+        onClear={mockOnClear}
+      />
+    )
+
+    expect(screen.getByRole('button', { name: /filter by free/i })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: /filter by negotiating/i })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: /filter by target/i })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('should render filter icon', () => {
+    render(
+      <FilterBar
+        activeStatuses={[]}
+        onStatusToggle={mockOnStatusToggle}
+        onClear={mockOnClear}
+      />
+    )
+
+    expect(screen.getByTestId('filter-icon')).toBeInTheDocument()
+  })
+
+  it('should render X icon on Clear button when filters are active', () => {
+    render(
+      <FilterBar
+        activeStatuses={['free']}
+        onStatusToggle={mockOnStatusToggle}
+        onClear={mockOnClear}
+      />
+    )
+
+    expect(screen.getByTestId('x-icon')).toBeInTheDocument()
   })
 })

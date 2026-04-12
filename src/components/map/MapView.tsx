@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer } from 'react-leaflet'
+import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
 import { useEffect, useState } from 'react'
 import type { Map } from 'leaflet'
 import { useParcels } from '@/hooks/useParcels'
@@ -9,8 +9,27 @@ import { DrawingHandler } from './DrawingHandler'
 import { DrawingPreview } from './DrawingPreview'
 import { ModeBadge } from './ModeBadge'
 import { BBoxDrawing } from './BBoxDrawing'
+import { BufferVisualization } from './BufferVisualization'
 import type { MapMode } from '@/hooks/useMapMode'
+import type { BufferResult } from '@/api/types'
 import type L from 'leaflet'
+
+// Internal component for handling buffer-point mode clicks
+interface BufferPointHandlerProps {
+  mode: MapMode
+  onBufferPointSelect?: (point: L.LatLng) => void
+}
+
+function BufferPointHandler({ mode, onBufferPointSelect }: BufferPointHandlerProps) {
+  useMapEvents({
+    click: (e) => {
+      if (mode === 'buffer-point' && onBufferPointSelect) {
+        onBufferPointSelect(e.latlng)
+      }
+    },
+  })
+  return null
+}
 
 interface MapViewProps {
   onParcelClick?: (id: number) => void
@@ -18,10 +37,14 @@ interface MapViewProps {
   onDrawingComplete?: (coordinates: number[][]) => void
   onDrawingCancel?: () => void
   drawingPoints?: [number, number][]
-  // New props for bbox mode
+  // Props for bbox mode
   mode?: MapMode
   onBboxComplete?: (bounds: L.LatLngBounds) => void
   onExitMode?: () => void
+  // Prop for buffer visualization
+  bufferResult?: BufferResult | null
+  // Prop for buffer point selection
+  onBufferPointSelect?: (point: L.LatLng) => void
 }
 
 export function MapView({
@@ -33,14 +56,16 @@ export function MapView({
   mode = 'normal',
   onBboxComplete,
   onExitMode,
+  bufferResult,
+  onBufferPointSelect,
 }: MapViewProps) {
   const { data, isLoading, isFetched } = useParcels()
   const [map, setMap] = useState<Map | null>(null)
 
-  // Change cursor to crosshair when in drawing or bbox mode
+  // Change cursor to crosshair when in drawing, bbox, or buffer-point mode
   useEffect(() => {
     if (map) {
-      const shouldShowCrosshair = isDrawingMode || mode === 'bbox'
+      const shouldShowCrosshair = isDrawingMode || mode === 'bbox' || mode === 'buffer-point'
       map.getContainer().style.cursor = shouldShowCrosshair ? 'crosshair' : ''
     }
   }, [map, isDrawingMode, mode])
@@ -65,6 +90,12 @@ export function MapView({
       className="z-0 h-full w-full"
       zoomControl={true}
     >
+      {/* Map event handlers for buffer-point mode */}
+      <BufferPointHandler
+        mode={mode}
+        onBufferPointSelect={onBufferPointSelect}
+      />
+
       {/* OpenStreetMap tile layer (MAP-01) */}
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -100,7 +131,16 @@ export function MapView({
       )}
 
       {/* Parcel layer with colored polygons (MAP-02, MAP-03) */}
-      {data && <ParcelLayer data={data} onParcelClick={onParcelClick} />}
+      {data && (
+        <ParcelLayer
+          data={data}
+          onParcelClick={onParcelClick}
+          bufferResult={bufferResult}
+        />
+      )}
+
+      {/* Buffer visualization overlay */}
+      {bufferResult && <BufferVisualization bufferResult={bufferResult} />}
     </MapContainer>
   )
 }

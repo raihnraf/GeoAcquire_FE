@@ -9,7 +9,9 @@ import { useParcels } from './hooks/useParcels'
 import { useCreateParcel } from './hooks/useCreateParcel'
 import { useUpdateParcel } from './hooks/useUpdateParcel'
 import { useDeleteParcel } from './hooks/useDeleteParcel'
-import type { ParcelFeature } from './api/types'
+import { useFilterParams } from './hooks/useFilterParams'
+import { useMapMode } from './hooks/useMapMode'
+import type { ParcelFeature, ParcelStatus } from './api/types'
 import type { ParcelFormData } from './lib/zod'
 import type { Polygon } from 'geojson'
 
@@ -22,6 +24,12 @@ function App() {
   const createParcel = useCreateParcel()
   const updateParcel = useUpdateParcel()
   const deleteParcel = useDeleteParcel()
+
+  // Filter params hook for URL synchronization
+  const { filters, setFilters, clearFilters } = useFilterParams()
+
+  // Map mode hook for bbox and buffer modes
+  const { mode, enterBboxMode, exitMode } = useMapMode()
 
   // Selected parcel state for sidebar
   const [selectedParcel, setSelectedParcel] = useState<ParcelFeature | null>(null)
@@ -80,13 +88,13 @@ function App() {
   }, [])
 
   // Handle drawing point update (from DrawingHandler)
-  const handleDrawingPointAdd = useCallback((point: [number, number]) => {
-    setDrawingPoints((prev) => [...prev, point])
-  }, [])
+  // const handleDrawingPointAdd = useCallback((point: [number, number]) => {
+  //   setDrawingPoints((prev) => [...prev, point])
+  // }, [])
 
   // Handle create parcel submission
   const handleCreateSubmit = useCallback(async (data: ParcelFormData) => {
-    const geometry = formGeometry || data.geometry
+    const geometry = (formGeometry || data.geometry) as typeof data.geometry
     await createParcel.mutateAsync({ ...data, geometry })
   }, [createParcel, formGeometry])
 
@@ -112,6 +120,25 @@ function App() {
     }
   }, [deleteParcel, parcelToDelete])
 
+  // Handle status filter toggle
+  const handleStatusToggle = useCallback((status: ParcelStatus) => {
+    const newStatuses = filters.status.includes(status)
+      ? filters.status.filter((s) => s !== status)
+      : [...filters.status, status]
+    setFilters({ ...filters, status: newStatuses })
+  }, [filters, setFilters])
+
+  // Handle bbox drawing complete
+  const handleBboxComplete = useCallback((bounds: import('leaflet').LatLngBounds) => {
+    setFilters({ ...filters, bbox: bounds })
+    exitMode()
+  }, [filters, setFilters, exitMode])
+
+  // Handle Draw Box button click
+  const handleDrawBoxClick = useCallback(() => {
+    enterBboxMode()
+  }, [enterBboxMode])
+
   // Placeholder handlers for header buttons (implemented in later phases)
   const handleFilterClick = () => console.log('Filter clicked')
   const handleImportClick = () => console.log('Import clicked')
@@ -126,6 +153,9 @@ function App() {
         onDrawingComplete={handleDrawingComplete}
         onDrawingCancel={handleDrawingCancel}
         drawingPoints={drawingPoints}
+        mode={mode}
+        onBboxComplete={handleBboxComplete}
+        onExitMode={exitMode}
       />
 
       {/* Header overlay at z-10, top */}
@@ -134,6 +164,13 @@ function App() {
         onImportClick={handleImportClick}
         onStatsClick={handleStatsClick}
         onAddParcelClick={handleAddParcelClick}
+        onDrawBoxClick={handleDrawBoxClick}
+        showFilterBar={true}
+        filterBarProps={{
+          activeStatuses: filters.status,
+          onStatusToggle: handleStatusToggle,
+          onClear: clearFilters,
+        }}
       />
 
       {/* Status bar overlay at z-10, bottom */}

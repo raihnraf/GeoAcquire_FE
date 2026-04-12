@@ -16,6 +16,7 @@ vi.mock('react-leaflet', () => ({
   },
   TileLayer: () => <div data-testid="tile-layer" />,
   GeoJSON: ({ data }: { data: unknown }) => <div data-testid="geojson-layer" data-features={JSON.stringify(data)} />,
+  useMapEvents: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
 // Mock the drawing components

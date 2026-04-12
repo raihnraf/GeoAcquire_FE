@@ -87,7 +87,7 @@
 - [x] 03-02-PLAN.md — FormField and ParcelForm components (CRUD-02)
 - [x] 03-03-PLAN.md — useCreateParcel hook and DrawingHandler (CRUD-01, CRUD-08, CRUD-09)
 - [x] 03-04-PLAN.md — DrawingPreview and MapView drawing integration (CRUD-01)
-- [ ] 03-05-PLAN.md — ParcelSidebar view/edit/create modes (CRUD-03, CRUD-04)
+- [x] 03-05-PLAN.md — ParcelSidebar view/edit/create modes (CRUD-03, CRUD-04)
 - [ ] 03-06-PLAN.md — useUpdateParcel, useDeleteParcel hooks and DeleteConfirmModal (CRUD-04, CRUD-05, CRUD-08, CRUD-09)
 - [ ] 03-07-PLAN.md — DrawingToolbar and App-level workflow integration (CRUD-01, CRUD-03, CRUD-04, CRUD-05)
 
@@ -171,7 +171,7 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-04-12 |
 | 2. Map Core | 5/5 | Complete | 2026-04-12 |
-| 3. CRUD Operations | 4/8 | In Progress|  |
+| 3. CRUD Operations | 5/8 | In Progress|  |
 | 4. Spatial Analysis | 0/5 | Not started | - |
 | 5. Import & Statistics | 0/4 | Not started | - |
 | 6. Polish & Production | 0/4 | Not started | - |

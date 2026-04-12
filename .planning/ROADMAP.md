@@ -7,7 +7,7 @@
 ## Phases
 
 - [x] **Phase 1: Foundation** - Project setup, dependencies, base layout, and core infrastructure (Completed: 2026-04-12)
-- [ ] **Phase 2: Map Core** - Interactive Leaflet map with parcel rendering and sidebar
+- [x] **Phase 2: Map Core** - Interactive Leaflet map with parcel rendering and sidebar (Completed: 2026-04-12)
 - [ ] **Phase 3: CRUD Operations** - Create, edit, view, and delete parcels with forms
 - [ ] **Phase 4: Spatial Analysis** - Buffer analysis and bounding box filtering
 - [ ] **Phase 5: Import & Statistics** - GeoJSON import and area statistics dashboard
@@ -52,11 +52,11 @@
 
 **Plans**: 5 plans
 
-- [ ] 02-01-PLAN.md — Install lucide-react, import Leaflet CSS, create test utilities, build LoadingSkeleton and EmptyState components
-- [ ] 02-02-PLAN.md — Create useParcels React Query hook and MapHeader component with action buttons
-- [ ] 02-03-PLAN.md — Create MapView with Leaflet MapContainer, ParcelLayer with GeoJSON rendering, and MapStatusBar
-- [ ] 02-04-PLAN.md — Create ParcelSidebar with slide-in animation for parcel details
-- [ ] 02-05-PLAN.md — Wire all components in App.tsx with full-screen layout
+- [x] 02-01-PLAN.md — Install lucide-react, import Leaflet CSS, create test utilities, build LoadingSkeleton and EmptyState components
+- [x] 02-02-PLAN.md — Create useParcels React Query hook and MapHeader component with action buttons
+- [x] 02-03-PLAN.md — Create MapView with Leaflet MapContainer, ParcelLayer with GeoJSON rendering, and MapStatusBar
+- [x] 02-04-PLAN.md — Create ParcelSidebar with slide-in animation for parcel details
+- [x] 02-05-PLAN.md — Wire all components in App.tsx with full-screen layout
 
 **UI hint**: yes
 
@@ -80,7 +80,16 @@
 7. Toast notifications appear for successful and failed operations
 8. Map refreshes automatically after any create/update/delete operation
 
-**Plans**: TBD
+**Plans**: 7 plans
+
+- [ ] 03-01-PLAN.md — Form validation and API error handling (CRUD-06, CRUD-07)
+- [ ] 03-02-PLAN.md — FormField and ParcelForm components (CRUD-02)
+- [ ] 03-03-PLAN.md — useCreateParcel hook and DrawingHandler (CRUD-01, CRUD-08, CRUD-09)
+- [ ] 03-04-PLAN.md — DrawingPreview and MapView drawing integration (CRUD-01)
+- [ ] 03-05-PLAN.md — ParcelSidebar view/edit/create modes (CRUD-03, CRUD-04)
+- [ ] 03-06-PLAN.md — useUpdateParcel, useDeleteParcel hooks and DeleteConfirmModal (CRUD-04, CRUD-05, CRUD-08, CRUD-09)
+- [ ] 03-07-PLAN.md — DrawingToolbar and App-level workflow integration (CRUD-01, CRUD-03, CRUD-04, CRUD-05)
+
 **UI hint**: yes
 
 ---
@@ -160,8 +169,8 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-04-12 |
-| 2. Map Core | 0/5 | Not started | - |
-| 3. CRUD Operations | 0/5 | Not started | - |
+| 2. Map Core | 5/5 | Complete | 2026-04-12 |
+| 3. CRUD Operations | 0/7 | Not started | - |
 | 4. Spatial Analysis | 0/5 | Not started | - |
 | 5. Import & Statistics | 0/4 | Not started | - |
 | 6. Polish & Production | 0/4 | Not started | - |

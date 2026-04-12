@@ -1,15 +1,37 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
+import { useEffect, useState } from 'react'
+import type { Map } from 'leaflet'
 import { useParcels } from '@/hooks/useParcels'
 import { LoadingSkeleton } from './LoadingSkeleton'
 import { EmptyState } from './EmptyState'
 import { ParcelLayer } from './ParcelLayer'
+import { DrawingHandler } from './DrawingHandler'
+import { DrawingPreview } from './DrawingPreview'
 
 interface MapViewProps {
   onParcelClick?: (id: number) => void
+  isDrawingMode?: boolean
+  onDrawingComplete?: (coordinates: number[][]) => void
+  onDrawingCancel?: () => void
+  drawingPoints?: [number, number][]
 }
 
-export function MapView({ onParcelClick }: MapViewProps) {
+export function MapView({
+  onParcelClick,
+  isDrawingMode = false,
+  onDrawingComplete,
+  onDrawingCancel,
+  drawingPoints,
+}: MapViewProps) {
   const { data, isLoading, isFetched } = useParcels()
+  const [map, setMap] = useState<Map | null>(null)
+
+  // Change cursor to crosshair when in drawing mode
+  useEffect(() => {
+    if (map) {
+      map.getContainer().style.cursor = isDrawingMode ? 'crosshair' : ''
+    }
+  }, [map, isDrawingMode])
 
   // Loading state (MAP-06)
   if (isLoading) {
@@ -23,6 +45,7 @@ export function MapView({ onParcelClick }: MapViewProps) {
 
   return (
     <MapContainer
+      ref={setMap}
       center={[-2.5, 118]} // Indonesia center (per RESEARCH.md)
       zoom={5}
       minZoom={3}
@@ -36,6 +59,20 @@ export function MapView({ onParcelClick }: MapViewProps) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         maxZoom={19}
       />
+
+      {/* Drawing handler for polygon drawing */}
+      {isDrawingMode && onDrawingComplete && onDrawingCancel && (
+        <DrawingHandler
+          isActive={isDrawingMode}
+          onDrawingComplete={onDrawingComplete}
+          onCancel={onDrawingCancel}
+        />
+      )}
+
+      {/* Drawing preview for visual feedback */}
+      {drawingPoints && drawingPoints.length > 0 && (
+        <DrawingPreview points={drawingPoints} />
+      )}
 
       {/* Parcel layer with colored polygons (MAP-02, MAP-03) */}
       {data && <ParcelLayer data={data} onParcelClick={onParcelClick} />}

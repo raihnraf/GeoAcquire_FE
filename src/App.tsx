@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import toast from 'react-hot-toast'
 import { MapView } from './components/map/MapView'
 import { MapHeader } from './components/map/MapHeader'
 import { MapStatusBar } from './components/map/MapStatusBar'
@@ -182,6 +183,15 @@ function App() {
     enterBufferMode()
   }, [enterBufferMode])
 
+  // Handle clear filters - resets all filters, exits mode, closes sidebar
+  const handleClearFilters = useCallback(() => {
+    clearFilters()
+    exitMode() // Exit any active mode
+    setSelectedParcel(null) // Close sidebar
+    setIsSidebarOpen(false)
+    toast.success('Filters cleared')
+  }, [clearFilters, exitMode])
+
   // Placeholder handlers for header buttons (implemented in later phases)
   const handleFilterClick = () => console.log('Filter clicked')
   const handleImportClick = () => console.log('Import clicked')
@@ -215,7 +225,7 @@ function App() {
         filterBarProps={{
           activeStatuses: filters.status,
           onStatusToggle: handleStatusToggle,
-          onClear: clearFilters,
+          onClear: handleClearFilters,
         }}
       />
 

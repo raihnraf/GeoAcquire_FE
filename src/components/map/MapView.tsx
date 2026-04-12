@@ -7,6 +7,10 @@ import { EmptyState } from './EmptyState'
 import { ParcelLayer } from './ParcelLayer'
 import { DrawingHandler } from './DrawingHandler'
 import { DrawingPreview } from './DrawingPreview'
+import { ModeBadge } from './ModeBadge'
+import { BBoxDrawing } from './BBoxDrawing'
+import type { MapMode } from '@/hooks/useMapMode'
+import type L from 'leaflet'
 
 interface MapViewProps {
   onParcelClick?: (id: number) => void
@@ -14,6 +18,10 @@ interface MapViewProps {
   onDrawingComplete?: (coordinates: number[][]) => void
   onDrawingCancel?: () => void
   drawingPoints?: [number, number][]
+  // New props for bbox mode
+  mode?: MapMode
+  onBboxComplete?: (bounds: L.LatLngBounds) => void
+  onExitMode?: () => void
 }
 
 export function MapView({
@@ -22,16 +30,20 @@ export function MapView({
   onDrawingComplete,
   onDrawingCancel,
   drawingPoints,
+  mode = 'normal',
+  onBboxComplete,
+  onExitMode,
 }: MapViewProps) {
   const { data, isLoading, isFetched } = useParcels()
   const [map, setMap] = useState<Map | null>(null)
 
-  // Change cursor to crosshair when in drawing mode
+  // Change cursor to crosshair when in drawing or bbox mode
   useEffect(() => {
     if (map) {
-      map.getContainer().style.cursor = isDrawingMode ? 'crosshair' : ''
+      const shouldShowCrosshair = isDrawingMode || mode === 'bbox'
+      map.getContainer().style.cursor = shouldShowCrosshair ? 'crosshair' : ''
     }
-  }, [map, isDrawingMode])
+  }, [map, isDrawingMode, mode])
 
   // Loading state (MAP-06)
   if (isLoading) {
@@ -59,6 +71,19 @@ export function MapView({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         maxZoom={19}
       />
+
+      {/* Mode badge indicator */}
+      {mode !== 'normal' && onExitMode && (
+        <ModeBadge mode={mode} onExit={onExitMode} />
+      )}
+
+      {/* Bounding box drawing handler */}
+      {mode === 'bbox' && onBboxComplete && onExitMode && (
+        <BBoxDrawing
+          onComplete={onBboxComplete}
+          onCancel={onExitMode}
+        />
+      )}
 
       {/* Drawing handler for polygon drawing */}
       {isDrawingMode && onDrawingComplete && onDrawingCancel && (

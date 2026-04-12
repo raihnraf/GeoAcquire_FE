@@ -46,7 +46,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **FLT-02**: User can draw bounding box to filter parcels within
 - [x] **FLT-03**: URL search params sync (?status, ?bbox, ?selected)
 - [x] **FLT-04**: Shareable links work via URL params
-- [ ] **FLT-05**: Clear filters resets to show all parcels
+- [x] **FLT-05**: Clear filters resets to show all parcels
 
 ### Spatial Analysis
 
@@ -136,7 +136,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FLT-02 | Phase 4 | Pending |
 | FLT-03 | Phase 4 | Complete |
 | FLT-04 | Phase 4 | Complete |
-| FLT-05 | Phase 4 | Pending |
+| FLT-05 | Phase 4 | Complete |
 | ANA-01 | Phase 4 | Complete |
 | ANA-02 | Phase 4 | Complete |
 | ANA-03 | Phase 4 | Complete |

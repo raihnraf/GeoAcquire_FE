@@ -30,15 +30,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Parcel CRUD
 
-- [ ] **CRUD-01**: User can create parcel by drawing polygon on map
+- [x] **CRUD-01**: User can create parcel by drawing polygon on map
 - [x] **CRUD-02**: User can create parcel by filling form (owner_name, status, price_per_sqm)
 - [ ] **CRUD-03**: User can view parcel details in sidebar when clicked
 - [ ] **CRUD-04**: User can edit parcel fields and geometry
 - [ ] **CRUD-05**: User can delete parcel with confirmation dialog
 - [x] **CRUD-06**: Form validation mirrors backend rules (Zod)
 - [ ] **CRUD-07**: Backend 422 errors mapped to form fields inline
-- [ ] **CRUD-08**: Success/error toasts on mutation outcomes
-- [ ] **CRUD-09**: Cache invalidation after create/update/delete
+- [x] **CRUD-08**: Success/error toasts on mutation outcomes
+- [x] **CRUD-09**: Cache invalidation after create/update/delete
 
 ### Filtering & Search
 
@@ -123,15 +123,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-05 | Phase 2 | Pending |
 | MAP-06 | Phase 2 | Pending |
 | MAP-07 | Phase 2 | Pending |
-| CRUD-01 | Phase 3 | Pending |
+| CRUD-01 | Phase 3 | Complete |
 | CRUD-02 | Phase 3 | Complete |
 | CRUD-03 | Phase 3 | Pending |
 | CRUD-04 | Phase 3 | Pending |
 | CRUD-05 | Phase 3 | Pending |
 | CRUD-06 | Phase 3 | Complete |
 | CRUD-07 | Phase 3 | Pending |
-| CRUD-08 | Phase 3 | Pending |
-| CRUD-09 | Phase 3 | Pending |
+| CRUD-08 | Phase 3 | Complete |
+| CRUD-09 | Phase 3 | Complete |
 | FLT-01 | Phase 4 | Pending |
 | FLT-02 | Phase 4 | Pending |
 | FLT-03 | Phase 4 | Pending |

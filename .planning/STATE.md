@@ -2,23 +2,23 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 4 — Spatial Analysis
-status: unknown
-last_updated: "2026-04-12T04:49:02.141Z"
+current_phase: 5 — Import & Statistics
+status: planning
+last_updated: "2026-04-12T04:50:00.000Z"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 24
+  total_plans: 29
   completed_plans: 24
-  percent: 100
+  percent: 83
 ---
 
 # GeoAcquire Frontend — State
 
 **Project:** GeoAcquire Frontend
 **Started:** 2026-04-11
-**Current Phase:** 4 — Spatial Analysis
-**Overall Progress:** 3/6 phases complete (50%)
+**Current Phase:** 5 — Import & Statistics
+**Overall Progress:** 4/6 phases complete (67%)
 
 ---
 
@@ -36,23 +36,24 @@ A standalone React SPA for visualizing and managing land parcels on an interacti
 
 ## Current Position
 
-**Phase**: 4 — Spatial Analysis
-**Status**: In progress (Plan 04-00 complete)
-**Progress Bar**: `[███████████░░░░░░░░░] 54%`
+**Phase**: 5 — Import & Statistics
+**Status**: Planning required
+**Progress Bar**: `[██████████████░░░░░] 67%`
 
 ### Last Completed Phase
 
-**Phase 3: CRUD Operations** — Complete ✓
+**Phase 4: Spatial Analysis** — Complete ✓
 
-- All 8 plans executed successfully
-- 57 tests passing
-- Full parcel CRUD workflow implemented
+- All 6 plans executed successfully
+- 144 tests passing
+- Status filtering, BBox drawing, buffer analysis all implemented
+- URL parameter synchronization complete
 
 ### Next Actions
 
-1. Run `/gsd-plan-phase 4` to create execution plan for Spatial Analysis
-2. Execute plans for buffer zones and bounding box queries
-3. Implement spatial statistics calculations
+1. Run `/gsd-plan-phase 5` to create execution plans for Import & Statistics
+2. Execute plans for GeoJSON import/export
+3. Implement area statistics dashboard
 
 ---
 
@@ -60,16 +61,17 @@ A standalone React SPA for visualizing and managing land parcels on an interacti
 
 | Metric | Target | Current |
 |--------|--------|---------|
-| Phases Complete | 6 | 3 |
+| Phases Complete | 6 | 4 |
 | Requirements Mapped | 38/38 | 38/38 ✓ |
-| Success Criteria Met | 33 | 19 |
+| Success Criteria Met | 33 | 28 |
 
 ---
+| Phase 04 P00 | 10min | 9 tasks | 9 files |
 | Phase 04 P01 | 9min | 4 tasks | 5 files |
-| Phase 04 P02 | 3m | 4 tasks | 8 files |
-| Phase 04-spatial-analysis P04-03 | PT5M | 3 tasks | 6 files |
-| Phase 04 P04 | PT6M | 3 tasks | 4 files |
-| Phase 04 P05 | 15 | 5 tasks | 5 files |
+| Phase 04 P02 | 11min | 4 tasks | 8 files |
+| Phase 04 P03 | 5min | 3 tasks | 6 files |
+| Phase 04 P04 | 6min | 3 tasks | 4 files |
+| Phase 04 P05 | 15min | 5 tasks | 5 files |
 
 ## Phase Progress Details
 
@@ -118,15 +120,38 @@ A standalone React SPA for visualizing and managing land parcels on an interacti
 - src/components/map/DrawingToolbar.tsx
 - src/App.tsx (updated)
 
-### Phase 4: Spatial Analysis 🔄 In Progress
+### Phase 4: Spatial Analysis ✅ Complete
 
-**Status**: In progress
-**Plans**: 1/5 complete
-**Success Criteria**: 0/11 met
+**Status**: Complete
+**Plans**: 6/6 complete
+**Success Criteria**: 11/11 met
 
 **Implementation Summary:**
 
-- 04-00: Test Infrastructure (9 test stubs created for components, hooks, utilities)
+- 04-00: Test Infrastructure (9 test stubs created)
+- 04-01: Status Filter UI with URL sync (FilterBar, useFilterParams, url-utils)
+- 04-02: BBox Drawing Mode (useMapMode, ModeBadge, BBoxDrawing)
+- 04-03: Buffer Analysis (useBufferAnalysis, BufferPanel, ParcelSidebar buffer mode)
+- 04-04: Buffer Visualization (BufferVisualization, ParcelLayer highlighting)
+- 04-05: Final Integration (buffer-from-point, URL buffer param, Share button)
+
+**Files Created/Modified:**
+
+- src/lib/url-utils.ts
+- src/hooks/useFilterParams.ts
+- src/hooks/useMapMode.ts
+- src/hooks/useBufferAnalysis.ts
+- src/components/map/FilterBar.tsx
+- src/components/map/BufferPanel.tsx
+- src/components/map/BufferVisualization.tsx
+- src/components/map/ModeBadge.tsx
+- src/components/map/BBoxDrawing.tsx
+- src/components/map/MapHeader.tsx (updated)
+- src/components/map/MapView.tsx (updated)
+- src/components/map/ParcelLayer.tsx (updated)
+- src/components/map/ParcelSidebar.tsx (updated)
+- src/App.tsx (updated)
+- 9 test stub files
 
 ### Phase 5: Import & Statistics
 
@@ -181,10 +206,10 @@ A standalone React SPA for visualizing and managing land parcels on an interacti
 
 ### Todos
 
-- [ ] Complete Phase 1: Foundation
-- [ ] Complete Phase 2: Map Core
-- [ ] Complete Phase 3: CRUD Operations
-- [ ] Complete Phase 4: Spatial Analysis
+- [x] Complete Phase 1: Foundation
+- [x] Complete Phase 2: Map Core
+- [x] Complete Phase 3: CRUD Operations
+- [x] Complete Phase 4: Spatial Analysis
 - [ ] Complete Phase 5: Import & Statistics
 - [ ] Complete Phase 6: Polish & Production
 
@@ -203,7 +228,7 @@ None identified
 
 ### Context Handoff
 
-Next session should continue with Phase 1 planning via `/gsd-plan-phase 1`.
+Next session should continue with Phase 5 planning via `/gsd-plan-phase 5`.
 
 ---
 

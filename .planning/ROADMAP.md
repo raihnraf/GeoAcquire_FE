@@ -121,7 +121,7 @@
 - [x] 04-00-PLAN.md — Wave 0: Test infrastructure setup (test stubs for Phase 4)
 - [x] 04-01-PLAN.md — FilterBar component and URL parameter synchronization (FLT-01, FLT-03, FLT-04)
 - [x] 04-02-PLAN.md — BBox drawing mode, useMapMode hook, ModeBadge component (FLT-02, FLT-05)
-- [ ] 04-03-PLAN.md — Buffer analysis hook and BufferPanel component (ANA-01, ANA-02, ANA-03, ANA-06)
+- [x] 04-03-PLAN.md — Buffer analysis hook and BufferPanel component (ANA-01, ANA-02, ANA-03, ANA-06)
 - [ ] 04-04-PLAN.md — Buffer visualization with circle and parcel highlighting (ANA-04, ANA-05)
 - [ ] 04-05-PLAN.md — Buffer-from-point mode and complete integration (FLT-05, ANA-02)
 

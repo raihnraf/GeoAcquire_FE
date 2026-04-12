@@ -50,12 +50,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Spatial Analysis
 
-- [ ] **ANA-01**: User can perform buffer analysis from selected parcel
-- [ ] **ANA-02**: User can perform buffer analysis from arbitrary point on map
-- [ ] **ANA-03**: Buffer distance input (1-10000 meters, default 500)
+- [x] **ANA-01**: User can perform buffer analysis from selected parcel
+- [x] **ANA-02**: User can perform buffer analysis from arbitrary point on map
+- [x] **ANA-03**: Buffer distance input (1-10000 meters, default 500)
 - [ ] **ANA-04**: Buffer radius circle visualized on map
 - [ ] **ANA-05**: Nearby parcels highlighted in blue
-- [ ] **ANA-06**: Buffer results count shown in sidebar
+- [x] **ANA-06**: Buffer results count shown in sidebar
 
 ### Import & Export
 
@@ -137,12 +137,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FLT-03 | Phase 4 | Complete |
 | FLT-04 | Phase 4 | Complete |
 | FLT-05 | Phase 4 | Pending |
-| ANA-01 | Phase 4 | Pending |
-| ANA-02 | Phase 4 | Pending |
-| ANA-03 | Phase 4 | Pending |
+| ANA-01 | Phase 4 | Complete |
+| ANA-02 | Phase 4 | Complete |
+| ANA-03 | Phase 4 | Complete |
 | ANA-04 | Phase 4 | Pending |
 | ANA-05 | Phase 4 | Pending |
-| ANA-06 | Phase 4 | Pending |
+| ANA-06 | Phase 4 | Complete |
 | IMP-01 | Phase 5 | Pending |
 | IMP-02 | Phase 5 | Pending |
 | IMP-03 | Phase 5 | Pending |

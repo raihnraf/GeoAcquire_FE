@@ -84,7 +84,7 @@
 
 - [x] 03-00-PLAN.md — Wave 0: Test infrastructure setup (all test stubs)
 - [x] 03-01-PLAN.md — Form validation and API error handling (CRUD-06, CRUD-07)
-- [ ] 03-02-PLAN.md — FormField and ParcelForm components (CRUD-02)
+- [x] 03-02-PLAN.md — FormField and ParcelForm components (CRUD-02)
 - [ ] 03-03-PLAN.md — useCreateParcel hook and DrawingHandler (CRUD-01, CRUD-08, CRUD-09)
 - [ ] 03-04-PLAN.md — DrawingPreview and MapView drawing integration (CRUD-01)
 - [ ] 03-05-PLAN.md — ParcelSidebar view/edit/create modes (CRUD-03, CRUD-04)
@@ -171,7 +171,7 @@
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-04-12 |
 | 2. Map Core | 5/5 | Complete | 2026-04-12 |
-| 3. CRUD Operations | 2/8 | In Progress|  |
+| 3. CRUD Operations | 3/8 | In Progress|  |
 | 4. Spatial Analysis | 0/5 | Not started | - |
 | 5. Import & Statistics | 0/4 | Not started | - |
 | 6. Polish & Production | 0/4 | Not started | - |

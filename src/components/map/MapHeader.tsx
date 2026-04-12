@@ -1,6 +1,8 @@
-import { Filter, FileUp, BarChart3, Plus, BoxSelect } from 'lucide-react'
+import { Filter, FileUp, BarChart3, Plus, BoxSelect, Target, Share2 } from 'lucide-react'
 import { FilterBar } from '@/components/map/FilterBar'
 import type { ParcelStatus } from '@/api/types'
+import toast from 'react-hot-toast'
+import { useCallback } from 'react'
 
 export interface MapHeaderProps {
   onFilterClick?: () => void
@@ -8,6 +10,8 @@ export interface MapHeaderProps {
   onStatsClick?: () => void
   onAddParcelClick?: () => void
   onDrawBoxClick?: () => void
+  onAnalyzeAreaClick?: () => void
+  shareableUrl?: string
   showFilterBar?: boolean
   filterBarProps?: {
     activeStatuses: ParcelStatus[]
@@ -22,9 +26,21 @@ export function MapHeader({
   onStatsClick,
   onAddParcelClick,
   onDrawBoxClick,
+  onAnalyzeAreaClick,
+  shareableUrl,
   showFilterBar = false,
   filterBarProps,
 }: MapHeaderProps) {
+  // Handle share button click
+  const handleShareClick = useCallback(() => {
+    const url = shareableUrl || window.location.href
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success('Link copied to clipboard')
+    }).catch(() => {
+      toast.error('Failed to copy link')
+    })
+  }, [shareableUrl])
+
   return (
     <>
       {/* Header */}
@@ -54,6 +70,28 @@ export function MapHeader({
           >
             <BoxSelect className="h-4 w-4" />
             <span className="hidden sm:inline">Draw Box</span>
+          </button>
+
+          {/* Analyze Area button */}
+          {onAnalyzeAreaClick && (
+            <button
+              onClick={onAnalyzeAreaClick}
+              className="flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+              aria-label="Analyze area with buffer"
+            >
+              <Target className="h-4 w-4" />
+              <span className="hidden sm:inline">Analyze Area</span>
+            </button>
+          )}
+
+          {/* Share button */}
+          <button
+            onClick={handleShareClick}
+            className="flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+            aria-label="Share current view"
+          >
+            <Share2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Share</span>
           </button>
 
           {/* Import button */}

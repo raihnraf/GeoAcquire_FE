@@ -57,6 +57,7 @@ export function ParcelLayer({ data, onParcelClick, bufferResult }: ParcelLayerPr
 
   return (
     <GeoJSON
+      key={JSON.stringify(data.features.map(f => f.id))}
       data={data}
       style={getStyle}
       eventHandlers={{

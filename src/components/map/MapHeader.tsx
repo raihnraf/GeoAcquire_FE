@@ -1,4 +1,4 @@
-import { Filter, FileUp, BarChart3, Plus, BoxSelect, Target, Share2 } from 'lucide-react'
+import { Filter, FileUp, FileDown, BarChart3, Plus, BoxSelect, Target, Share2 } from 'lucide-react'
 import { FilterBar } from '@/components/map/FilterBar'
 import type { ParcelStatus } from '@/api/types'
 import toast from 'react-hot-toast'
@@ -7,6 +7,7 @@ import { useCallback } from 'react'
 export interface MapHeaderProps {
   onFilterClick?: () => void
   onImportClick?: () => void
+  onExportClick?: () => void
   onStatsClick?: () => void
   onAddParcelClick?: () => void
   onDrawBoxClick?: () => void
@@ -23,6 +24,7 @@ export interface MapHeaderProps {
 export function MapHeader({
   onFilterClick,
   onImportClick,
+  onExportClick,
   onStatsClick,
   onAddParcelClick,
   onDrawBoxClick,
@@ -66,7 +68,8 @@ export function MapHeader({
           <button
             onClick={onDrawBoxClick}
             className="flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
-            aria-label="Draw bounding box"
+            aria-label="Draw bounding box to filter parcels"
+            title="Draw Box to Filter: Click and drag on map to filter parcels by area"
           >
             <BoxSelect className="h-4 w-4" />
             <span className="hidden sm:inline">Draw Box</span>
@@ -78,6 +81,7 @@ export function MapHeader({
               onClick={onAnalyzeAreaClick}
               className="flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
               aria-label="Analyze area with buffer"
+              title="Buffer Analysis: Find parcels within radius of point or parcel"
             >
               <Target className="h-4 w-4" />
               <span className="hidden sm:inline">Analyze Area</span>
@@ -99,9 +103,21 @@ export function MapHeader({
             onClick={onImportClick}
             className="flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
             aria-label="Import GeoJSON"
+            title="Import GeoJSON file from ArcGIS/QGIS"
           >
             <FileUp className="h-4 w-4" />
             <span className="hidden sm:inline">Import</span>
+          </button>
+
+          {/* Export button */}
+          <button
+            onClick={onExportClick}
+            className="flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+            aria-label="Export parcels as GeoJSON"
+            title="Export filtered parcels as GeoJSON file"
+          >
+            <FileDown className="h-4 w-4" />
+            <span className="hidden sm:inline">Export</span>
           </button>
 
           {/* Stats button */}

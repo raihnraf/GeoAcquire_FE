@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { queryClient } from '@/lib/queryClient'
 import toast from 'react-hot-toast'
+import { api } from '@/api/axios'
 import { MapView } from './components/map/MapView'
 import { MapHeader } from './components/map/MapHeader'
 import { MapStatusBar } from './components/map/MapStatusBar'
@@ -8,6 +9,8 @@ import { ParcelSidebar } from './components/map/ParcelSidebar'
 import { DeleteConfirmModal } from './components/map/DeleteConfirmModal'
 import { DrawingToolbar } from './components/map/DrawingToolbar'
 import { BBoxFilterBadge } from './components/map/BBoxFilterBadge'
+import { ImportModal } from './components/map/ImportModal'
+import { StatsModal } from './components/map/StatsModal'
 import { useParcels } from './hooks/useParcels'
 import { useCreateParcel } from './hooks/useCreateParcel'
 import { useUpdateParcel } from './hooks/useUpdateParcel'
@@ -52,6 +55,12 @@ function App() {
   // Delete confirmation state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [parcelToDelete, setParcelToDelete] = useState<ParcelFeature | null>(null)
+
+  // Import modal state
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+
+  // Stats modal state
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false)
 
   // Buffer analysis hook - uses filters from useFilterParams
   const { data: bufferResult } = useBufferAnalysis(
@@ -209,8 +218,46 @@ function App() {
 
   // Placeholder handlers for header buttons (implemented in later phases)
   const handleFilterClick = () => console.log('Filter clicked')
-  const handleImportClick = () => console.log('Import clicked')
-  const handleStatsClick = () => console.log('Stats clicked')
+  
+  const handleImportClick = useCallback(() => {
+    setIsImportModalOpen(true)
+  }, [])
+
+  const handleStatsClick = useCallback(() => {
+    setIsStatsModalOpen(true)
+  }, [])
+
+  const handleImportSuccess = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['parcels'] })
+  }, [])
+
+  const handleExportClick = useCallback(async () => {
+    try {
+      toast.loading('Exporting parcels...', { id: 'export' })
+      
+      const response = await api.get('/parcels/export', {
+        params: {
+          status: filters.status.length > 0 ? filters.status : undefined,
+        },
+        responseType: 'blob',
+      })
+
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `parcels_${new Date().toISOString().split('T')[0]}.geojson`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Parcels exported successfully', { id: 'export' })
+    } catch (error: any) {
+      toast.error('Failed to export parcels', { id: 'export' })
+    }
+  }, [filters.status])
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-slate-50">
@@ -236,6 +283,7 @@ function App() {
       <MapHeader
         onFilterClick={handleFilterClick}
         onImportClick={handleImportClick}
+        onExportClick={handleExportClick}
         onStatsClick={handleStatsClick}
         onAddParcelClick={handleAddParcelClick}
         onDrawBoxClick={handleDrawBoxClick}
@@ -299,6 +347,19 @@ function App() {
         }}
         onConfirm={handleDeleteConfirm}
         isDeleting={deleteParcel.isPending}
+      />
+
+      {/* Import modal overlay at z-50 */}
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportSuccess={handleImportSuccess}
+      />
+
+      {/* Stats modal overlay at z-50 */}
+      <StatsModal
+        isOpen={isStatsModalOpen}
+        onClose={() => setIsStatsModalOpen(false)}
       />
     </div>
   )

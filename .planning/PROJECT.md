@@ -20,8 +20,9 @@ Users can visualize, manage, and analyze land parcels through an interactive map
 - [ ] Parcel CRUD operations (create, view, edit, delete)
 - [ ] Filter parcels by status (free/negotiating/target) or bounding box
 - [ ] Buffer zone analysis from parcel or arbitrary point
-- [ ] Bulk GeoJSON import (up to 100 parcels)
-- [ ] Area statistics dashboard (aggregate by status)
+- [x] Bulk GeoJSON import (up to 100 parcels)
+- [x] Area statistics dashboard (aggregate by status)
+- [x] Export filtered parcels as GeoJSON file
 - [ ] URL-based state management for shareable links
 
 ### Out of Scope

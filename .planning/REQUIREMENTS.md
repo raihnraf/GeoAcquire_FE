@@ -59,16 +59,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Import & Export
 
-- [ ] **IMP-01**: User can upload GeoJSON FeatureCollection file
-- [ ] **IMP-02**: Import validates file structure (max 100 features)
-- [ ] **IMP-03**: Import shows success/error summary per feature
-- [ ] **IMP-04**: User can export current filtered parcels as GeoJSON file
+- [x] **IMP-01**: User can upload GeoJSON FeatureCollection file
+- [x] **IMP-02**: Import validates file structure (max 100 features)
+- [x] **IMP-03**: Import shows success/error summary per feature
+- [x] **IMP-04**: User can export current filtered parcels as GeoJSON file
 
 ### Statistics
 
-- [ ] **STAT-01**: User can view aggregate area totals by status
-- [ ] **STAT-02**: Area displayed in both sqm and hectares
-- [ ] **STAT-03**: Stats modal accessible from header button
+- [x] **STAT-01**: User can view aggregate area totals by status
+- [x] **STAT-02**: Area displayed in both sqm and hectares
+- [x] **STAT-03**: Stats modal accessible from header button
 
 ## v2 Requirements
 
@@ -143,13 +143,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ANA-04 | Phase 4 | Complete |
 | ANA-05 | Phase 4 | Complete |
 | ANA-06 | Phase 4 | Complete |
-| IMP-01 | Phase 5 | Pending |
-| IMP-02 | Phase 5 | Pending |
-| IMP-03 | Phase 5 | Pending |
-| IMP-04 | Phase 5 | Pending |
-| STAT-01 | Phase 5 | Pending |
-| STAT-02 | Phase 5 | Pending |
-| STAT-03 | Phase 5 | Pending |
+| IMP-01 | Phase 5 | Complete |
+| IMP-02 | Phase 5 | Complete |
+| IMP-03 | Phase 5 | Complete |
+| IMP-04 | Phase 5 | Complete |
+| STAT-01 | Phase 5 | Complete |
+| STAT-02 | Phase 5 | Complete |
+| STAT-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 38 total

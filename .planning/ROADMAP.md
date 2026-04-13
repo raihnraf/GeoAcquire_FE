@@ -139,15 +139,24 @@
 
 **Success Criteria** (what must be TRUE):
 1. User can upload a GeoJSON file via import dialog
-2. Import rejects invalid files with error message
+2. Import validates file structure and rejects invalid files with error message
 3. Import shows summary of successful and failed feature imports
-4. User can export currently filtered parcels as GeoJSON file
+4. User can export currently filtered parcels as GeoJSON file (with date-stamped filename)
 5. User can click stats button to see modal with area totals
-6. Stats modal shows area in both square meters and hectares
+6. Stats modal shows area in both square meters and hectares with progress bars
 7. Stats are broken down by parcel status (free/negotiating/target)
+8. Quick insight shows available land ready for acquisition
 
-**Plans**: TBD
-**UI hint**: yes
+**Status**: ✅ Complete (2026-04-14)
+
+**Files Created**:
+- `src/components/map/ImportModal.tsx` - Drag-and-drop GeoJSON upload with validation
+- `src/components/map/StatsModal.tsx` - Area aggregation dashboard with progress bars
+
+**Files Modified**:
+- `src/App.tsx` - Import/export handlers, modal state management
+- `src/components/map/MapHeader.tsx` - Import/Export buttons with tooltips
+- `src/components/map/ModeBadge.tsx` - Better labels and helper text
 
 ---
 
@@ -181,7 +190,7 @@
 | 2. Map Core | 5/5 | Complete | 2026-04-12 |
 | 3. CRUD Operations | 8/8 | Complete   | 2026-04-12 |
 | 4. Spatial Analysis | 6/6 | Complete   | 2026-04-12 |
-| 5. Import & Statistics | 0/4 | Not started | - |
+| 5. Import & Statistics | ✅ Complete | Complete | 2026-04-14 |
 | 6. Polish & Production | 0/4 | Not started | - |
 
 ---
@@ -199,8 +208,8 @@
 | Statistics | STAT-01 through STAT-03 (3) | Phase 5 |
 | **Total v1** | **38 requirements** | **6 phases** |
 
-**Coverage: 38/38 (100%)**
+**Coverage: 38/38 (100%)** — All v1 requirements complete! 🎉
 
 ---
 
-*Last updated: 2026-04-12*
+*Last updated: 2026-04-14*

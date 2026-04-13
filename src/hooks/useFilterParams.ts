@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { parseBbox, parseStatus, parseBuffer, buildUrlParams, type FilterState } from '@/lib/url-utils'
+import { parseBbox, parseStatusFromParams, parseBuffer, buildUrlParams, type FilterState } from '@/lib/url-utils'
 
 const DEFAULT_FILTERS: FilterState = {
   status: [],
@@ -20,13 +20,12 @@ export function useFilterParams() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
 
-    const statusParam = params.get('status')
     const bboxParam = params.get('bbox')
     const selectedParam = params.get('selected')
     const bufferParam = params.get('buffer')
 
     const parsedFilters: FilterState = {
-      status: parseStatus(statusParam),
+      status: parseStatusFromParams(params),
       bbox: parseBbox(bboxParam),
       selected: selectedParam ? parseInt(selectedParam, 10) : null,
       bufferCenter: null,
@@ -54,8 +53,16 @@ export function useFilterParams() {
   // Update URL when filters change
   useEffect(() => {
     const params = buildUrlParams(filters)
-    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`
-    window.history.replaceState(null, '', newUrl)
+    const queryString = params.toString()
+
+    // Clear URL params when all filters are empty (including status=[])
+    if (queryString) {
+      const newUrl = `${window.location.pathname}?${queryString}`
+      window.history.replaceState(null, '', newUrl)
+    } else {
+      // Remove all query params when no filters active
+      window.history.replaceState(null, '', window.location.pathname)
+    }
   }, [filters])
 
   // Clear all filters

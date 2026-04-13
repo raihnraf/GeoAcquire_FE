@@ -728,17 +728,13 @@ export function FilterBar({ activeStatuses, onStatusToggle, onClear }: FilterBar
 | A3 | Backend returns buffer results as GeoJSON FeatureCollection | Standard Stack | If format differs, BufferResult type needs update |
 | A4 | URL params don't require routing library (React Router) | Architecture Patterns | If app needs full routing later, may need to add React Router |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Backend Filter Support: Does the Laravel API support server-side filtering?**
-   - What we know: Need to filter by status and bounding box
-   - What's unclear: Whether backend supports ?status and ?bbox query params
-   - Recommendation: Implement client-side filtering first, add server-side filtering if backend supports it. The UI remains the same either way.
+   - **RESOLVED:** Implement client-side filtering for Phase 4. The UI pattern remains the same whether filtering happens client-side or server-side. If backend supports ?status and ?bbox query params later, the implementation can be extended to use server-side filtering for better performance with large datasets.
 
 2. **Buffer Calculation: Should buffer analysis run on client or server?**
-   - What we know: Need to find parcels within radius of point
-   - What's unclear: Backend API capability for spatial queries
-   - Recommendation: Use backend endpoint if available (more accurate for geodetic calculations), fallback to client-side distance calculation using Turf.js or similar.
+   - **RESOLVED:** Use backend POST /buffer endpoint for spatial queries (more accurate for geodetic calculations). The BufferResult type is already defined in src/api/types.ts, and bufferRequestSchema in src/lib/zod.ts validates the request. For local development without backend, mock data can be used for UI testing.
 
 ## Environment Availability
 

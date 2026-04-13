@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { Map } from 'leaflet'
-import { useParcels } from '@/hooks/useParcels'
+import type { ParcelCollection } from '@/api/types'
 import { LoadingSkeleton } from './LoadingSkeleton'
 import { EmptyState } from './EmptyState'
 import { ParcelLayer } from './ParcelLayer'
@@ -32,6 +32,9 @@ function BufferPointHandler({ mode, onBufferPointSelect }: BufferPointHandlerPro
 }
 
 interface MapViewProps {
+  data?: ParcelCollection | null
+  isLoading?: boolean
+  isFetched?: boolean
   onParcelClick?: (id: number) => void
   isDrawingMode?: boolean
   onDrawingComplete?: (coordinates: number[][]) => void
@@ -41,6 +44,7 @@ interface MapViewProps {
   mode?: MapMode
   onBboxComplete?: (bounds: L.LatLngBounds) => void
   onExitMode?: () => void
+  activeBbox?: L.LatLngBounds | null
   // Prop for buffer visualization
   bufferResult?: BufferResult | null
   // Prop for buffer point selection
@@ -48,6 +52,9 @@ interface MapViewProps {
 }
 
 export function MapView({
+  data,
+  isLoading = false,
+  isFetched = false,
   onParcelClick,
   isDrawingMode = false,
   onDrawingComplete,
@@ -56,11 +63,17 @@ export function MapView({
   mode = 'normal',
   onBboxComplete,
   onExitMode,
+  activeBbox,
   bufferResult,
   onBufferPointSelect,
 }: MapViewProps) {
-  const { data, isLoading, isFetched } = useParcels()
   const [map, setMap] = useState<Map | null>(null)
+  // Preserve viewport state across re-renders (e.g., when filters change)
+  const [viewport, setViewport] = useState<{ center: L.LatLngExpression; zoom: number }>({
+    center: [-2.5, 118] as L.LatLngExpression,
+    zoom: 5,
+  })
+  const isInitialized = useRef(false)
 
   // Change cursor to crosshair when in drawing, bbox, or buffer-point mode
   useEffect(() => {
@@ -69,6 +82,28 @@ export function MapView({
       map.getContainer().style.cursor = shouldShowCrosshair ? 'crosshair' : ''
     }
   }, [map, isDrawingMode, mode])
+
+  // Track viewport changes to preserve them across re-renders
+  useEffect(() => {
+    if (!map) return
+
+    const handleMoveEnd = () => {
+      const center = map.getCenter()
+      const zoom = map.getZoom()
+      setViewport({ center: [center.lat, center.lng], zoom })
+    }
+
+    map.on('moveend', handleMoveEnd)
+
+    // Set initial viewport on first mount only
+    if (!isInitialized.current) {
+      isInitialized.current = true
+    }
+
+    return () => {
+      map.off('moveend', handleMoveEnd)
+    }
+  }, [map])
 
   // Loading state (MAP-06)
   if (isLoading) {
@@ -83,8 +118,8 @@ export function MapView({
   return (
     <MapContainer
       ref={setMap}
-      center={[-2.5, 118]} // Indonesia center (per RESEARCH.md)
-      zoom={5}
+      center={viewport.center}
+      zoom={viewport.zoom}
       minZoom={3}
       maxZoom={19}
       className="z-0 h-full w-full"
@@ -108,11 +143,12 @@ export function MapView({
         <ModeBadge mode={mode} onExit={onExitMode} />
       )}
 
-      {/* Bounding box drawing handler */}
-      {mode === 'bbox' && onBboxComplete && onExitMode && (
+      {/* Bounding box drawing handler - also shows when activeBbox exists */}
+      {(mode === 'bbox' || activeBbox) && onBboxComplete && onExitMode && (
         <BBoxDrawing
           onComplete={onBboxComplete}
           onCancel={onExitMode}
+          activeBbox={activeBbox}
         />
       )}
 

@@ -617,22 +617,22 @@ export function DrawingPreview({ points }: { points: [number, number][] }) {
 | A3 | Backend requires polygon to be closed (first == last coordinate) | Common Pitfalls #2 | If backend auto-closes, we may add redundant points |
 | A4 | Drawing mode can use simple click handlers without @react-leaflet/draw | Don't Hand-Roll | If requirements expand to editing vertices, may need drawing library |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Geometry Edit Flow: How should users edit existing parcel geometry?**
    - What we know: Need to enable drawing mode when editing
    - What's unclear: Should we show original polygon as reference? How to handle partial edits?
-   - Recommendation: Show original polygon in gray, allow adding new vertices, replace entire geometry on save
+   - **RESOLVED:** Show original polygon in gray (semi-transparent), allow clicking to add new vertices or drag to move, replace entire geometry on save. Implementation in ParcelSidebar edit mode with DrawingHandler for geometry editing.
 
 2. **Form Submission Order: Should geometry be required before form, or vice versa?**
    - What we know: Both are required for creation
    - What's unclear: User preference and UX best practice
-   - Recommendation: Support both flows - allow drawing first or form first, validate both before submission
+   - **RESOLVED:** Support both flows - allow drawing first or form first, validate both before submission. UI-SPEC specifies this dual-flow approach. ParcelForm will show geometry state and prompt user to draw if missing.
 
 3. **Delete Permission: Should delete require special permission or confirmation?**
    - What we know: Need confirmation dialog (CRUD-05)
    - What's unclear: Any additional safeguards (e.g., admin-only)?
-   - Recommendation: Single confirmation dialog is sufficient for portfolio/demo project
+   - **RESOLVED:** Single confirmation dialog is sufficient for portfolio/demo project (no authentication in v1). DeleteConfirmModal component will provide user confirmation before calling useDeleteParcel hook.
 
 ## Environment Availability
 

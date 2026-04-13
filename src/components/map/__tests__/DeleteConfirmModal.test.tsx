@@ -80,8 +80,7 @@ describe('DeleteConfirmModal', () => {
       />
     )
 
-    const deleteButton = screen.getByRole('button', { name: /delete/i })
+    const deleteButton = screen.getByRole('button', { name: /deleting/i })
     expect(deleteButton).toBeDisabled()
-    expect(screen.getByText(/deleting/i)).toBeInTheDocument()
   })
 })

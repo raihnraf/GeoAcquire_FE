@@ -3,6 +3,7 @@ import { Edit, Trash, X, Radio } from 'lucide-react'
 import type { ParcelFeature, BufferResult } from '@/api/types'
 import { formatArea, formatPrice, formatDate, getParcelColor } from '@/lib/utils'
 import { ParcelForm } from './ParcelForm'
+import { BufferPanel } from './BufferPanel'
 import type { ParcelFormData } from '@/lib/zod'
 
 type SidebarMode = 'view' | 'edit' | 'create' | 'buffer'
@@ -18,6 +19,7 @@ interface ParcelSidebarProps {
   onCreateSubmit?: (data: ParcelFormData) => Promise<void>
   bufferResult?: BufferResult | null
   onBufferStart?: () => void
+  onBufferApply?: (radius: number) => void
   onParcelClick?: (id: number) => void
 }
 
@@ -39,6 +41,7 @@ export function ParcelSidebar({
   onCreateSubmit,
   bufferResult,
   onBufferStart,
+  onBufferApply,
   onParcelClick,
 }: ParcelSidebarProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -267,10 +270,11 @@ export function ParcelSidebar({
     )
   }
 
-  // Buffer mode - shows nearby parcels results
+  // Buffer mode - shows buffer panel for input or results list
   if (mode === 'buffer') {
     const parcelCount = bufferResult?.parcels.features.length ?? 0
     const radius = bufferResult?.radius ?? 0
+    const hasResults = bufferResult !== null && bufferResult !== undefined
 
     return (
       <aside
@@ -282,23 +286,41 @@ export function ParcelSidebar({
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Nearby Parcels</h2>
-              <p className="text-sm text-slate-600">
-                {parcelCount} {parcelCount === 1 ? 'parcel' : 'parcels'} within {radius}m
-              </p>
+              <h2 className="text-lg font-semibold text-slate-900">
+                {hasResults ? 'Nearby Parcels' : 'Buffer Analysis'}
+              </h2>
+              {hasResults && (
+                <p className="text-sm text-slate-600">
+                  {parcelCount} {parcelCount === 1 ? 'parcel' : 'parcels'} within {radius}m
+                </p>
+              )}
             </div>
             <button
               onClick={() => onModeChange?.('view')}
               className="rounded p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              aria-label="Close buffer results"
+              aria-label="Close buffer panel"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          {/* Results list */}
+          {/* Content area */}
           <div className="flex-1 overflow-y-auto">
-            {parcelCount === 0 ? (
+            {!hasResults ? (
+              /* Buffer input panel */
+              <div className="p-4">
+                <div className="mb-4">
+                  <p className="text-sm text-slate-600">
+                    Set the buffer radius to find nearby parcels around the selected location.
+                  </p>
+                </div>
+                <BufferPanel
+                  initialRadius={500}
+                  onApply={onBufferApply || (() => {})}
+                  onCancel={() => onModeChange?.('view')}
+                />
+              </div>
+            ) : parcelCount === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 text-center">
                 <Radio className="h-12 w-12 text-slate-400 mb-3" />
                 <h3 className="text-base font-semibold text-slate-700 mb-1">
@@ -309,6 +331,7 @@ export function ParcelSidebar({
                 </p>
               </div>
             ) : (
+              /* Results list */
               <div className="divide-y divide-slate-100">
                 {bufferResult?.parcels.features.map((feature) => {
                   const props = feature.properties

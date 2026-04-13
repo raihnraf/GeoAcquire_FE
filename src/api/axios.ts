@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios'
+import qs from 'qs'
 
 // Create axios instance with base URL from environment
 export const api = axios.create({
@@ -6,6 +7,11 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+  },
+  paramsSerializer: (params) => {
+    // Use 'repeat' notation for arrays: status=free&status=negotiating
+    // This format works better with PHP's built-in server
+    return qs.stringify(params, { arrayFormat: 'repeat' })
   },
 })
 

@@ -18,7 +18,54 @@ export interface FilterState {
 const VALID_STATUSES: ParcelStatus[] = ['free', 'negotiating', 'target']
 
 /**
- * Parse status parameter from URL
+ * Parse status parameter(s) from URL.
+ * Supports multiple formats:
+ * - Multiple params: status=free&status=negotiating
+ * - Array-style: status[]=free&status[]=negotiating
+ * - Comma-separated: status=free,negotiating
+ * @param params - URLSearchParams instance
+ * @returns Array of valid ParcelStatus values
+ */
+export function parseStatusFromParams(params: URLSearchParams): ParcelStatus[] {
+  // Try multiple params first (status=free&status=negotiating)
+  const statusArray = params.getAll('status')
+  if (statusArray.length > 1) {
+    const validParts = statusArray.filter(
+      (s): s is ParcelStatus => s !== '' && VALID_STATUSES.includes(s as ParcelStatus)
+    )
+    if (validParts.length > 0) {
+      return validParts
+    }
+  }
+
+  // Try single value or comma-separated (status=free,negotiating)
+  const statusParam = params.get('status')
+  if (statusParam) {
+    const parts = statusParam.split(',').map(s => s.trim().toLowerCase())
+    const validParts = parts.filter(
+      (s): s is ParcelStatus => s !== '' && VALID_STATUSES.includes(s as ParcelStatus)
+    )
+    if (validParts.length > 0) {
+      return validParts
+    }
+  }
+
+  // Try array-style format (status[]=free&status[]=negotiating) - legacy
+  const statusBracketsArray = params.getAll('status[]')
+  if (statusBracketsArray.length > 0) {
+    const validParts = statusBracketsArray.filter(
+      (s): s is ParcelStatus => s !== '' && VALID_STATUSES.includes(s as ParcelStatus)
+    )
+    if (validParts.length > 0) {
+      return validParts
+    }
+  }
+
+  return []
+}
+
+/**
+ * Parse status parameter from URL (legacy function for backward compatibility)
  * @param statusParam - Comma-separated status string or null
  * @returns Array of valid ParcelStatus values
  */
@@ -121,14 +168,18 @@ export function parseBuffer(
 
 /**
  * Build URLSearchParams from filter state
+ * Uses array-style parameters (status[]=free&status[]=negotiating) to work around
+ * PHP built-in server's limitation with commas in query parameters.
  * @param filters - Current filter state
  * @returns URLSearchParams instance
  */
 export function buildUrlParams(filters: FilterState): URLSearchParams {
   const params = new URLSearchParams()
 
+  // Use plain status parameter (status=free&status=negotiating)
+  // Laravel handles this as array automatically
   if (filters.status.length > 0) {
-    params.set('status', filters.status.join(','))
+    filters.status.forEach(status => params.append('status', status))
   }
 
   if (filters.bbox) {

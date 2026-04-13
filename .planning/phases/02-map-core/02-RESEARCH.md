@@ -516,17 +516,19 @@ export function EmptyState() {
 
 **If this table is empty:** All claims in this research were verified or cited — no user confirmation needed.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Default map center/zoom**
+1. **Default map center/zoom** (RESOLVED)
    - What we know: Map needs initial center and zoom
    - What's unclear: Should default center be Indonesia-wide or specific region?
    - Recommendation: Use Indonesia center `[-2.5, 118]` with zoom 5, or fit bounds to parcels when data loads
+   - **Resolution:** Implemented in Plan 03 (MapView component) with Indonesia center `[-2.5, 118]` and zoom 5
 
-2. **Parcel selection state management**
+2. **Parcel selection state management** (RESOLVED)
    - What we know: Clicking a parcel opens sidebar
    - What's unclear: Should selection be local state or URL param (for Phase 4)?
    - Recommendation: Local state for Phase 2, migrate to URL param in Phase 4
+   - **Resolution:** Implemented in Plan 05 (App.tsx) with local state (`useState`) for selected parcel, URL sync deferred to Phase 4
 
 ## Environment Availability
 
@@ -573,13 +575,13 @@ export function EmptyState() {
 
 ### Wave 0 Gaps
 
-- [ ] `src/components/map/__tests__/MapView.test.tsx` — covers MAP-01
-- [ ] `src/components/map/__tests__/ParcelLayer.test.tsx` — covers MAP-02, MAP-03
-- [ ] `src/components/map/__tests__/MapHeader.test.tsx` — covers MAP-04
-- [ ] `src/components/map/__tests__/MapStatusBar.test.tsx` — covers MAP-05
-- [ ] `src/components/map/__tests__/LoadingSkeleton.test.tsx` — covers MAP-06
-- [ ] `src/components/map/__tests__/EmptyState.test.tsx` — covers MAP-07
-- [ ] `src/test/map-test-utils.tsx` — shared map testing utilities (mock MapContainer)
+- [x] `src/components/map/__tests__/MapView.test.tsx` — covers MAP-01
+- [x] `src/components/map/__tests__/ParcelLayer.test.tsx` — covers MAP-02, MAP-03
+- [x] `src/components/map/__tests__/MapHeader.test.tsx` — covers MAP-04
+- [x] `src/components/map/__tests__/MapStatusBar.test.tsx` — covers MAP-05
+- [x] `src/components/map/__tests__/LoadingSkeleton.test.tsx` — covers MAP-06
+- [x] `src/components/map/__tests__/EmptyState.test.tsx` — covers MAP-07
+- [x] `src/test/map-test-utils.tsx` — shared map testing utilities (mock MapContainer)
 
 ## Security Domain
 

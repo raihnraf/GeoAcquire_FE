@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { queryClient } from '@/lib/queryClient'
 import toast from 'react-hot-toast'
 import { MapView } from './components/map/MapView'
 import { MapHeader } from './components/map/MapHeader'
@@ -6,6 +7,7 @@ import { MapStatusBar } from './components/map/MapStatusBar'
 import { ParcelSidebar } from './components/map/ParcelSidebar'
 import { DeleteConfirmModal } from './components/map/DeleteConfirmModal'
 import { DrawingToolbar } from './components/map/DrawingToolbar'
+import { BBoxFilterBadge } from './components/map/BBoxFilterBadge'
 import { useParcels } from './hooks/useParcels'
 import { useCreateParcel } from './hooks/useCreateParcel'
 import { useUpdateParcel } from './hooks/useUpdateParcel'
@@ -21,15 +23,16 @@ import L from 'leaflet'
 type SidebarMode = 'view' | 'edit' | 'create' | 'buffer'
 
 function App() {
-  const { data } = useParcels()
+  // Filter params hook for URL synchronization
+  const { filters, setFilters, clearFilters } = useFilterParams()
+
+  // Fetch parcels with server-side status filtering
+  const { data, isLoading, isFetched } = useParcels({ statuses: filters.status })
 
   // Mutation hooks for CRUD operations
   const createParcel = useCreateParcel()
   const updateParcel = useUpdateParcel()
   const deleteParcel = useDeleteParcel()
-
-  // Filter params hook for URL synchronization
-  const { filters, setFilters, clearFilters } = useFilterParams()
 
   // Map mode hook for bbox and buffer modes
   const { mode, enterBboxMode, enterBufferMode, exitMode } = useMapMode()
@@ -134,6 +137,13 @@ function App() {
     const newStatuses = filters.status.includes(status)
       ? filters.status.filter((s) => s !== status)
       : [...filters.status, status]
+
+    // If clearing the last filter, invalidate cache to force fresh data fetch
+    // This ensures all parcels are shown, not stale cached data
+    if (newStatuses.length === 0 && filters.status.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ['parcels'] })
+    }
+
     setFilters({ ...filters, status: newStatuses })
   }, [filters, setFilters])
 
@@ -192,6 +202,11 @@ function App() {
     toast.success('Filters cleared')
   }, [clearFilters, exitMode])
 
+  // Handle clear bbox filter only
+  const handleClearBbox = useCallback(() => {
+    setFilters({ ...filters, bbox: null })
+  }, [filters, setFilters])
+
   // Placeholder handlers for header buttons (implemented in later phases)
   const handleFilterClick = () => console.log('Filter clicked')
   const handleImportClick = () => console.log('Import clicked')
@@ -201,6 +216,9 @@ function App() {
     <div className="relative h-screen w-screen overflow-hidden bg-slate-50">
       {/* Map layer at z-0 */}
       <MapView
+        data={data}
+        isLoading={isLoading}
+        isFetched={isFetched}
         onParcelClick={handleParcelClick}
         isDrawingMode={isDrawingMode}
         onDrawingComplete={handleDrawingComplete}
@@ -209,6 +227,7 @@ function App() {
         mode={mode}
         onBboxComplete={handleBboxComplete}
         onExitMode={exitMode}
+        activeBbox={filters.bbox}
         bufferResult={bufferResult || null}
         onBufferPointSelect={handleBufferPointSelect}
       />
@@ -227,6 +246,12 @@ function App() {
           onStatusToggle: handleStatusToggle,
           onClear: handleClearFilters,
         }}
+      />
+
+      {/* BBox filter badge - shows when bbox filter is active */}
+      <BBoxFilterBadge
+        bbox={filters.bbox}
+        onClear={handleClearBbox}
       />
 
       {/* Status bar overlay at z-10, bottom */}

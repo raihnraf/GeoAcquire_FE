@@ -5,6 +5,7 @@ import L from 'leaflet'
 interface BBoxDrawingProps {
   onComplete: (bounds: L.LatLngBounds) => void
   onCancel: () => void
+  activeBbox?: L.LatLngBounds | null  // Persist bbox after completion
 }
 
 /**
@@ -15,17 +16,18 @@ interface BBoxDrawingProps {
  * - Mouse movement updates the rectangle preview
  * - Second click completes the bounding box
  * - Escape key cancels the drawing
- * - Blue rectangle with 10% fill opacity
+ * - Active bbox persists with subtle styling (outline only)
  *
  * Usage:
  * ```tsx
  * <BBoxDrawing
  *   onComplete={(bounds) => setFilters({ ...filters, bbox: bounds })}
  *   onCancel={() => exitMode()}
+ *   activeBbox={filters.bbox}
  * />
  * ```
  */
-export function BBoxDrawing({ onComplete, onCancel }: BBoxDrawingProps) {
+export function BBoxDrawing({ onComplete, onCancel, activeBbox }: BBoxDrawingProps) {
   const [startPoint, setStartPoint] = useState<L.LatLng | null>(null)
   const [currentPoint, setCurrentPoint] = useState<L.LatLng | null>(null)
 
@@ -64,7 +66,22 @@ export function BBoxDrawing({ onComplete, onCancel }: BBoxDrawingProps) {
     },
   })
 
-  // Only render rectangle when we have both points
+  // Show active bbox if exists (filter applied)
+  if (activeBbox && !startPoint) {
+    return (
+      <Rectangle
+        bounds={activeBbox}
+        color="#3b82f6"       // blue-500 stroke
+        fillColor="#3b82f6"   // blue-500 fill
+        fillOpacity={0.05}    // More subtle fill for active bbox
+        weight={2}
+        dashArray="5, 5"      // Dashed line for active filter indicator
+        interactive={false}    // Don't capture clicks on the rectangle itself
+      />
+    )
+  }
+
+  // Only render preview rectangle when drawing
   if (!startPoint || !currentPoint) {
     return null
   }
@@ -76,9 +93,9 @@ export function BBoxDrawing({ onComplete, onCancel }: BBoxDrawingProps) {
       bounds={bounds}
       color="#3b82f6"       // blue-500 stroke
       fillColor="#3b82f6"   // blue-500 fill
-      fillOpacity={0.1}     // 10% fill opacity
+      fillOpacity={0.15}    // 15% fill opacity for drawing preview
       weight={2}
-      interactive={false}   // Don't capture clicks on the rectangle itself
+      interactive={false}    // Don't capture clicks on the rectangle itself
     />
   )
 }

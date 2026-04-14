@@ -12,7 +12,8 @@ interface StatsModalProps {
 
 interface StatusAreaData {
   status: ParcelStatus
-  total_area: number
+  total_area_sqm: number
+  total_area_hectares: number
 }
 
 interface AggregateStats {
@@ -37,6 +38,7 @@ const STATUS_LABELS: Record<ParcelStatus, string> = {
 export function StatsModal({ isOpen, onClose }: StatsModalProps) {
   const [stats, setStats] = useState<AggregateStats | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch statistics when modal opens
   useEffect(() => {
@@ -44,27 +46,30 @@ export function StatsModal({ isOpen, onClose }: StatsModalProps) {
 
     const fetchStats = async () => {
       setIsLoading(true)
+      setError(null)
       try {
         // Fetch area aggregation
         const areaResponse = await api.get('/parcels/aggregate/area', {
           params: { by: 'status' },
         })
 
-        // Fetch all parcels to get count
-        const parcelsResponse = await api.get('/parcels')
-        const parcels = parcelsResponse.data.data?.features || []
+        // Fetch parcel count (lightweight endpoint, no GeoJSON payload)
+        const countResponse = await api.get('/parcels/count')
+        const totalCount = countResponse.data.total || 0
 
         const areaData: StatusAreaData[] = areaResponse.data.data || []
 
-        const totalArea = areaData.reduce((sum, item) => sum + item.total_area, 0)
+        const totalArea = areaData.reduce((sum, item) => sum + item.total_area_sqm, 0)
 
         setStats({
           areas: areaData,
-          totalParcels: parcels.length,
+          totalParcels: totalCount,
           totalArea,
         })
-      } catch (error: any) {
-        const message = error.response?.data?.message || 'Failed to load statistics'
+      } catch (err: any) {
+        const message = err.response?.data?.message || err.message || 'Failed to load statistics'
+        console.error('StatsModal error:', err)
+        setError(message)
         toast.error(message)
       } finally {
         setIsLoading(false)
@@ -102,6 +107,29 @@ export function StatsModal({ isOpen, onClose }: StatsModalProps) {
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-blue-600" />
               <p className="ml-3 text-sm text-slate-600">Loading statistics...</p>
             </div>
+          ) : error ? (
+            <div className="rounded-lg bg-red-50 p-4">
+              <div className="flex items-start gap-3">
+                <TrendingDown className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-900">
+                    Failed to Load Statistics
+                  </p>
+                  <p className="mt-1 text-sm text-red-800">
+                    {error}
+                  </p>
+                  <button
+                    onClick={() => {
+                      setError(null)
+                      setStats(null)
+                    }}
+                    className="mt-3 rounded-md bg-red-100 px-3 py-1.5 text-sm font-medium text-red-900 hover:bg-red-200"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            </div>
           ) : stats ? (
             <div className="space-y-4">
               {/* Summary Cards */}
@@ -128,7 +156,7 @@ export function StatsModal({ isOpen, onClose }: StatsModalProps) {
                 <div className="space-y-2">
                   {stats.areas.map((item) => {
                     const percentage = stats.totalArea > 0
-                      ? ((item.total_area / stats.totalArea) * 100).toFixed(1)
+                      ? ((item.total_area_sqm / stats.totalArea) * 100).toFixed(1)
                       : '0'
 
                     return (
@@ -147,7 +175,7 @@ export function StatsModal({ isOpen, onClose }: StatsModalProps) {
                             </span>
                           </div>
                           <span className="text-sm font-bold text-slate-900">
-                            {formatArea(item.total_area)}
+                            {formatArea(item.total_area_sqm)}
                           </span>
                         </div>
 
@@ -181,10 +209,10 @@ export function StatsModal({ isOpen, onClose }: StatsModalProps) {
                         Quick Insight
                       </p>
                       <p className="mt-1 text-xs text-amber-800">
-                        {stats.areas.find(a => a.status === 'free')?.total_area &&
-                         stats.areas.find(a => a.status === 'free')!.total_area > 0 ? (
+                        {stats.areas.find(a => a.status === 'free')?.total_area_sqm &&
+                         stats.areas.find(a => a.status === 'free')!.total_area_sqm > 0 ? (
                           <>
-                            {formatArea(stats.areas.find(a => a.status === 'free')!.total_area)} of available land 
+                            {formatArea(stats.areas.find(a => a.status === 'free')!.total_area_sqm)} of available land
                             ready for immediate acquisition
                           </>
                         ) : (

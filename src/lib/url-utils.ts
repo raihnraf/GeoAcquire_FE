@@ -10,6 +10,8 @@ export interface FilterState {
   selected: number | null
   bufferCenter: L.LatLng | null
   bufferRadius: number
+  viewportCenter: L.LatLng | null
+  viewportZoom: number
 }
 
 /**
@@ -167,6 +169,48 @@ export function parseBuffer(
 }
 
 /**
+ * Parse viewport parameter from URL
+ * @param centerParam - Viewport center string "lat,lng" or null
+ * @param zoomParam - Zoom level string or null
+ * @returns Object with viewportCenter and viewportZoom, or null if invalid
+ */
+export function parseViewport(
+  centerParam: string | null,
+  zoomParam: string | null
+): { viewportCenter: L.LatLng; viewportZoom: number } | null {
+  if (!centerParam || !zoomParam) {
+    return null
+  }
+
+  const centerParts = centerParam.split(',')
+  if (centerParts.length !== 2) {
+    return null
+  }
+
+  const [lat, lng] = centerParts.map(v => parseFloat(v))
+  const zoom = parseInt(zoomParam, 10)
+
+  // Validate all values are valid numbers
+  if (isNaN(lat) || isNaN(lng) || isNaN(zoom)) {
+    return null
+  }
+
+  // Validate zoom is within reasonable bounds (1-19)
+  if (zoom < 1 || zoom > 19) {
+    return null
+  }
+
+  try {
+    return {
+      viewportCenter: L.latLng(lat, lng),
+      viewportZoom: zoom,
+    }
+  } catch {
+    return null
+  }
+}
+
+/**
  * Build URLSearchParams from filter state
  * Uses array-style parameters (status[]=free&status[]=negotiating) to work around
  * PHP built-in server's limitation with commas in query parameters.
@@ -194,6 +238,13 @@ export function buildUrlParams(filters: FilterState): URLSearchParams {
   if (filters.bufferCenter) {
     const { lat, lng } = filters.bufferCenter
     params.set('buffer', `${lat},${lng}:${filters.bufferRadius}`)
+  }
+
+  // Add viewport parameters
+  if (filters.viewportCenter) {
+    const { lat, lng } = filters.viewportCenter
+    params.set('center', `${lat},${lng}`)
+    params.set('zoom', String(filters.viewportZoom))
   }
 
   return params

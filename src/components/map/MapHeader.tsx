@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { useCallback } from 'react'
 
 export interface MapHeaderProps {
+  onHomeClick?: () => void
   onFilterClick?: () => void
   onImportClick?: () => void
   onExportClick?: () => void
@@ -22,6 +23,7 @@ export interface MapHeaderProps {
 }
 
 export function MapHeader({
+  onHomeClick,
   onFilterClick,
   onImportClick,
   onExportClick,
@@ -48,9 +50,13 @@ export function MapHeader({
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-10 flex h-16 items-center justify-between bg-white px-4 shadow-sm">
         {/* Logo */}
-        <div className="flex items-center">
+        <button
+          onClick={onHomeClick}
+          className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+          aria-label="Go to home page"
+        >
           <h1 className="text-xl font-semibold text-slate-900">GeoAcquire</h1>
-        </div>
+        </button>
 
         {/* Action buttons */}
         <div className="flex items-center gap-2">
@@ -81,7 +87,7 @@ export function MapHeader({
               onClick={onAnalyzeAreaClick}
               className="flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
               aria-label="Analyze area with buffer"
-              title="Buffer Analysis: Find parcels within radius of point or parcel"
+              title="Buffer Analysis: Click to select a point on the map, then set a radius to find all parcels within that distance"
             >
               <Target className="h-4 w-4" />
               <span className="hidden sm:inline">Analyze Area</span>

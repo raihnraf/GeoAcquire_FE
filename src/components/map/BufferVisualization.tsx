@@ -5,6 +5,8 @@ import { BUFFER_COLOR } from '@/lib/utils'
 
 interface BufferVisualizationProps {
   bufferResult: BufferResult | null
+  center: L.LatLng | null
+  radius: number
 }
 
 /**
@@ -15,34 +17,33 @@ interface BufferVisualizationProps {
  * - Center point marker at the analysis location
  *
  * @param bufferResult - Buffer analysis result from API or null to hide
+ * @param center - Buffer center coordinates
+ * @param radius - Buffer radius in meters
  */
-export function BufferVisualization({ bufferResult }: BufferVisualizationProps) {
-  // Return null if no buffer result
-  if (!bufferResult) {
+export function BufferVisualization({ bufferResult, center, radius }: BufferVisualizationProps) {
+  // Return null if no buffer result or invalid center/radius
+  if (!bufferResult || !center || radius <= 0) {
     return null
   }
-
-  // Parse center from GeoJSON [lng, lat] format
-  const centerCoords = bufferResult.center.coordinates
-  const centerLatLng = L.latLng(centerCoords[1], centerCoords[0])
 
   return (
     <>
       {/* Buffer radius circle */}
       <Circle
-        center={centerLatLng}
-        radius={bufferResult.radius}
+        center={center}
+        radius={radius}
         pathOptions={{
           color: BUFFER_COLOR,           // blue-500 stroke
           fillColor: BUFFER_COLOR,
           fillOpacity: 0.15,             // 15% opacity per UI-SPEC
           weight: 2,
         }}
+        interactive={false}
       />
 
       {/* Center point marker */}
       <CircleMarker
-        center={centerLatLng}
+        center={center}
         radius={6}
         pathOptions={{
           fillColor: BUFFER_COLOR,
@@ -50,6 +51,7 @@ export function BufferVisualization({ bufferResult }: BufferVisualizationProps) 
           weight: 2,
           fillOpacity: 1,
         }}
+        interactive={false}
       />
     </>
   )

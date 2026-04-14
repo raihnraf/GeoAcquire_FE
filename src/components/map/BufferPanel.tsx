@@ -32,25 +32,45 @@ export function BufferPanel({
   onCancel,
 }: BufferPanelProps) {
   const [distance, setDistance] = useState(initialRadius)
+  const [inputValue, setInputValue] = useState(String(initialRadius))
 
   const handleDistanceChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value)
-    setDistance(value)
+    const value = e.target.value
+    setInputValue(value)
+    
+    // Only update distance if value is a valid number
+    if (value === '' || value === '-') {
+      // Allow empty input while typing
+      return
+    }
+    
+    const numValue = Number(value)
+    if (!isNaN(numValue)) {
+      setDistance(numValue)
+    }
+  }
+
+  const handleDistanceBlur = () => {
+    // Validate and clamp on blur
+    if (inputValue === '' || inputValue === '-') {
+      setInputValue('500')
+      setDistance(500)
+    }
   }
 
   const handleApply = () => {
     // Validate distance range
+    let validatedDistance = distance
     if (distance < 1) {
-      setDistance(1)
-      onApply(1)
-      return
+      validatedDistance = 1
     }
     if (distance > 10000) {
-      setDistance(10000)
-      onApply(10000)
-      return
+      validatedDistance = 10000
     }
-    onApply(distance)
+    
+    setInputValue(String(validatedDistance))
+    setDistance(validatedDistance)
+    onApply(validatedDistance)
   }
 
   const handleCancel = () => {
@@ -58,7 +78,7 @@ export function BufferPanel({
   }
 
   return (
-    <div className="absolute top-4 right-4 z-[15] bg-white shadow-lg rounded-lg p-3 w-64">
+    <div className="bg-white rounded-lg p-3 w-full">
       {/* Label */}
       <label className="block text-sm font-medium text-slate-700 mb-2">
         Buffer Radius
@@ -72,8 +92,9 @@ export function BufferPanel({
           min={1}
           max={10000}
           step={10}
-          value={distance}
+          value={inputValue}
           onChange={handleDistanceChange}
+          onBlur={handleDistanceBlur}
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm flex-1 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
           aria-label="Buffer radius in meters"
         />

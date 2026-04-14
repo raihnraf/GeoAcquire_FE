@@ -41,7 +41,7 @@ export function useBufferAnalysis(center: L.LatLng | null, radius: number) {
       const validated = bufferRequestSchema.parse(requestData)
 
       // Post to buffer endpoint
-      const { data } = await api.post<BufferResult>('/buffer', validated)
+      const { data } = await api.post<BufferResult>('/analysis/buffer', validated)
       return data
     },
     enabled: !!center && radius > 0 && radius <= 10000,

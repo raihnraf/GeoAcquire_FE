@@ -1,9 +1,19 @@
 import axios, { AxiosError } from 'axios'
 import qs from 'qs'
 
+const apiUrl = import.meta.env.VITE_API_URL
+
+// Warn at runtime if API URL is not configured (production only)
+if (!apiUrl && import.meta.env.PROD) {
+  console.warn(
+    '[GeoAcquire] VITE_API_URL is not set. API calls will fail. ' +
+    'Set VITE_API_URL in .env.production or Vercel Dashboard → Environment Variables.'
+  )
+}
+
 // Create axios instance with base URL from environment
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  baseURL: apiUrl || '/api/v1',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',

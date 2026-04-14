@@ -38,6 +38,7 @@ interface MapViewProps {
   onParcelClick?: (id: number) => void
   isDrawingMode?: boolean
   onDrawingComplete?: (coordinates: number[][]) => void
+  onDrawingPointAdd?: (point: [number, number]) => void
   onDrawingCancel?: () => void
   drawingPoints?: [number, number][]
   // Props for bbox mode
@@ -47,8 +48,16 @@ interface MapViewProps {
   activeBbox?: L.LatLngBounds | null
   // Prop for buffer visualization
   bufferResult?: BufferResult | null
+  bufferCenter?: L.LatLng | null
+  bufferRadius?: number
   // Prop for buffer point selection
   onBufferPointSelect?: (point: L.LatLng) => void
+  // Props for viewport synchronization
+  viewportCenter?: L.LatLng | null
+  viewportZoom?: number
+  onViewportChange?: (center: L.LatLng, zoom: number) => void
+  // Prop for map bounds (for bbox-based parcel fetching)
+  onBoundsChange?: (bounds: L.LatLngBounds | null) => void
 }
 
 export function MapView({
@@ -58,6 +67,7 @@ export function MapView({
   onParcelClick,
   isDrawingMode = false,
   onDrawingComplete,
+  onDrawingPointAdd,
   onDrawingCancel,
   drawingPoints,
   mode = 'normal',
@@ -65,15 +75,32 @@ export function MapView({
   onExitMode,
   activeBbox,
   bufferResult,
+  bufferCenter,
+  bufferRadius,
   onBufferPointSelect,
+  viewportCenter,
+  viewportZoom,
+  onViewportChange,
+  onBoundsChange,
 }: MapViewProps) {
   const [map, setMap] = useState<Map | null>(null)
+  const [mapBounds, setMapBounds] = useState<L.LatLngBounds | null>(null)
   // Preserve viewport state across re-renders (e.g., when filters change)
   const [viewport, setViewport] = useState<{ center: L.LatLngExpression; zoom: number }>({
-    center: [-2.5, 118] as L.LatLngExpression,
-    zoom: 5,
+    center: viewportCenter ? [viewportCenter.lat, viewportCenter.lng] : [-2.5, 118] as L.LatLngExpression,
+    zoom: viewportZoom || 5,
   })
   const isInitialized = useRef(false)
+
+  // Initialize viewport from URL params on mount
+  useEffect(() => {
+    if (viewportCenter && viewportZoom && !isInitialized.current) {
+      setViewport({
+        center: [viewportCenter.lat, viewportCenter.lng],
+        zoom: viewportZoom,
+      })
+    }
+  }, [viewportCenter, viewportZoom])
 
   // Change cursor to crosshair when in drawing, bbox, or buffer-point mode
   useEffect(() => {
@@ -87,23 +114,53 @@ export function MapView({
   useEffect(() => {
     if (!map) return
 
+    const DEBOUNCE_MS = 400
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
     const handleMoveEnd = () => {
       const center = map.getCenter()
       const zoom = map.getZoom()
+      const bounds = map.getBounds()
       setViewport({ center: [center.lat, center.lng], zoom })
+
+      // Debounce bounds/viewport notifications to prevent API spam
+      // when user rapidly pans/zooms the map
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
+      }
+      debounceTimer = setTimeout(() => {
+        setMapBounds(bounds)
+
+        if (onViewportChange) {
+          onViewportChange(center, zoom)
+        }
+
+        if (onBoundsChange) {
+          onBoundsChange(bounds)
+        }
+      }, DEBOUNCE_MS)
+    }
+
+    // Set initial bounds on mount
+    if (!isInitialized.current) {
+      setMapBounds(map.getBounds())
+      isInitialized.current = true
+
+      // Notify initial bounds
+      if (onBoundsChange) {
+        onBoundsChange(map.getBounds())
+      }
     }
 
     map.on('moveend', handleMoveEnd)
 
-    // Set initial viewport on first mount only
-    if (!isInitialized.current) {
-      isInitialized.current = true
-    }
-
     return () => {
       map.off('moveend', handleMoveEnd)
+      if (debounceTimer) {
+        clearTimeout(debounceTimer)
+      }
     }
-  }, [map])
+  }, [map, onViewportChange, onBoundsChange])
 
   // Loading state (MAP-06)
   if (isLoading) {
@@ -157,6 +214,7 @@ export function MapView({
         <DrawingHandler
           isActive={isDrawingMode}
           onDrawingComplete={onDrawingComplete}
+          onPointAdd={onDrawingPointAdd}
           onCancel={onDrawingCancel}
         />
       )}
@@ -172,11 +230,18 @@ export function MapView({
           data={data}
           onParcelClick={onParcelClick}
           bufferResult={bufferResult}
+          mapBounds={mapBounds}
         />
       )}
 
       {/* Buffer visualization overlay */}
-      {bufferResult && <BufferVisualization bufferResult={bufferResult} />}
+      {bufferResult && (
+        <BufferVisualization
+          bufferResult={bufferResult}
+          center={bufferCenter || null}
+          radius={bufferRadius || 0}
+        />
+      )}
     </MapContainer>
   )
 }

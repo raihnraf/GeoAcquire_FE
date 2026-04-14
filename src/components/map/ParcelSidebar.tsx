@@ -5,6 +5,7 @@ import { formatArea, formatPrice, formatDate, getParcelColor } from '@/lib/utils
 import { ParcelForm } from './ParcelForm'
 import { BufferPanel } from './BufferPanel'
 import type { ParcelFormData } from '@/lib/zod'
+import type { Polygon } from 'geojson'
 
 type SidebarMode = 'view' | 'edit' | 'create' | 'buffer'
 
@@ -17,6 +18,7 @@ interface ParcelSidebarProps {
   onDelete?: () => void
   onEditSubmit?: (id: number, data: ParcelFormData) => Promise<void>
   onCreateSubmit?: (data: ParcelFormData) => Promise<void>
+  geometry?: Polygon | null
   bufferResult?: BufferResult | null
   onBufferStart?: () => void
   onBufferApply?: (radius: number) => void
@@ -39,6 +41,7 @@ export function ParcelSidebar({
   onDelete,
   onEditSubmit,
   onCreateSubmit,
+  geometry,
   bufferResult,
   onBufferStart,
   onBufferApply,
@@ -46,19 +49,24 @@ export function ParcelSidebar({
 }: ParcelSidebarProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Early return if no parcel and not in create mode
-  if (!parcel && mode !== 'create') return null
+  // Early return if no parcel and not in create or buffer mode
+  if (!parcel && mode !== 'create' && mode !== 'buffer') return null
 
   // Prepare default values based on mode
   const defaultValues: ParcelFormData =
     mode === 'create'
-      ? DEFAULT_CREATE_VALUES
-      : {
-          owner_name: parcel!.properties.owner_name,
-          status: parcel!.properties.status,
-          price_per_sqm: parcel!.properties.price_per_sqm ?? undefined,
-          geometry: parcel!.geometry as typeof DEFAULT_CREATE_VALUES.geometry,
+      ? {
+          ...DEFAULT_CREATE_VALUES,
+          geometry: (geometry || DEFAULT_CREATE_VALUES.geometry) as typeof DEFAULT_CREATE_VALUES.geometry,
         }
+      : mode === 'buffer'
+        ? DEFAULT_CREATE_VALUES // Buffer mode doesn't need form defaults
+        : {
+            owner_name: parcel!.properties.owner_name,
+            status: parcel!.properties.status,
+            price_per_sqm: parcel!.properties.price_per_sqm ?? undefined,
+            geometry: parcel!.geometry as typeof DEFAULT_CREATE_VALUES.geometry,
+          }
 
   // Handle edit submission
   const handleEditSubmit = async (data: ParcelFormData) => {
@@ -272,9 +280,9 @@ export function ParcelSidebar({
 
   // Buffer mode - shows buffer panel for input or results list
   if (mode === 'buffer') {
-    const parcelCount = bufferResult?.parcels.features.length ?? 0
-    const radius = bufferResult?.radius ?? 0
-    const hasResults = bufferResult !== null && bufferResult !== undefined
+    const parcelCount = bufferResult?.features?.length ?? 0
+    const radius = bufferResult?.metadata?.total !== undefined ? 500 : 0 // Default radius
+    const hasResults = bufferResult !== null && bufferResult !== undefined && bufferResult?.type === 'FeatureCollection'
 
     return (
       <aside
@@ -333,7 +341,7 @@ export function ParcelSidebar({
             ) : (
               /* Results list */
               <div className="divide-y divide-slate-100">
-                {bufferResult?.parcels.features.map((feature) => {
+                {bufferResult?.features.map((feature) => {
                   const props = feature.properties
 
                   return (

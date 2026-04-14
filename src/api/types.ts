@@ -21,15 +21,39 @@ export type ParcelFeature = Feature<Polygon, ParcelProperties>
 // GeoJSON FeatureCollection for parcel lists
 export type ParcelCollection = FeatureCollection<Polygon, ParcelProperties>
 
+// Pagination metadata (returned in ParcelCollection.metadata when paginated)
+export interface ParcelCollectionMetadata {
+  total: number
+  current_page?: number
+  per_page?: number
+  last_page?: number
+  links?: {
+    first?: string
+    last?: string
+    prev?: string | null
+    next?: string | null
+  }
+}
+
+// Extended ParcelCollection with metadata (for paginated responses)
+export interface PaginatedParcelCollection extends ParcelCollection {
+  metadata?: ParcelCollectionMetadata
+}
+
 // Buffer analysis result (point + nearby parcels)
 export interface BufferPoint extends Point {
   coordinates: [number, number] // [lng, lat] per GeoJSON spec
 }
 
 export interface BufferResult {
-  center: BufferPoint
-  radius: number
-  parcels: ParcelCollection
+  type: 'FeatureCollection'
+  features: ParcelFeature[]
+  metadata?: {
+    total: number
+  }
+  center?: BufferPoint
+  radius?: number
+  parcels?: ParcelCollection
 }
 
 // Generic API response wrapper
@@ -64,6 +88,12 @@ export interface ImportResult {
     feature: number
     message: string
   }>
+}
+
+// Parcel count response (lightweight endpoint for StatsModal)
+export interface ParcelCountResponse {
+  total: number
+  by_status: Record<ParcelStatus, number>
 }
 
 // Form data types (re-exported from zod for consistency)

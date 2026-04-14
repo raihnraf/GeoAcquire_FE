@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { parseBbox, parseStatusFromParams, parseBuffer, buildUrlParams, type FilterState } from '@/lib/url-utils'
+import { parseBbox, parseStatusFromParams, parseBuffer, parseViewport, buildUrlParams, type FilterState } from '@/lib/url-utils'
 
 const DEFAULT_FILTERS: FilterState = {
   status: [],
@@ -7,6 +7,8 @@ const DEFAULT_FILTERS: FilterState = {
   selected: null,
   bufferCenter: null,
   bufferRadius: 500,
+  viewportCenter: null,
+  viewportZoom: 5,
 }
 
 /**
@@ -23,6 +25,8 @@ export function useFilterParams() {
     const bboxParam = params.get('bbox')
     const selectedParam = params.get('selected')
     const bufferParam = params.get('buffer')
+    const centerParam = params.get('center')
+    const zoomParam = params.get('zoom')
 
     const parsedFilters: FilterState = {
       status: parseStatusFromParams(params),
@@ -30,6 +34,8 @@ export function useFilterParams() {
       selected: selectedParam ? parseInt(selectedParam, 10) : null,
       bufferCenter: null,
       bufferRadius: 500,
+      viewportCenter: null,
+      viewportZoom: 5,
     }
 
     // Parse buffer parameter if present
@@ -39,12 +45,20 @@ export function useFilterParams() {
       parsedFilters.bufferRadius = bufferResult.bufferRadius
     }
 
+    // Parse viewport parameter if present
+    const viewportResult = parseViewport(centerParam, zoomParam)
+    if (viewportResult) {
+      parsedFilters.viewportCenter = viewportResult.viewportCenter
+      parsedFilters.viewportZoom = viewportResult.viewportZoom
+    }
+
     // Only update if parsed values differ from defaults
     if (
       parsedFilters.status.length > 0 ||
       parsedFilters.bbox !== null ||
       parsedFilters.selected !== null ||
-      parsedFilters.bufferCenter !== null
+      parsedFilters.bufferCenter !== null ||
+      parsedFilters.viewportCenter !== null
     ) {
       setFilters(parsedFilters)
     }

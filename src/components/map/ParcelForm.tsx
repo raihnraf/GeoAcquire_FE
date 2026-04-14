@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { ParcelFormData } from '@/lib/zod'
 import { parcelSchema } from '@/lib/zod'
 import { FormField } from './FormField'
+import { CurrencyInput } from './CurrencyInput'
 import { cn } from '@/lib/utils'
 
 export interface ParcelFormProps {
@@ -110,16 +111,28 @@ export function ParcelForm({
 
       {/* Price per Square Meter Field */}
       <div className="mb-4">
-        <FormField
+        <CurrencyInput
           label="Price per m²"
           name="price_per_sqm"
-          type="number"
-          register={register('price_per_sqm', { valueAsNumber: true })}
+          register={register('price_per_sqm')}
           error={errors.price_per_sqm?.message}
-          placeholder="Enter price per square meter (optional)"
+          placeholder="0"
           disabled={isSubmitting}
         />
+        <p className="mt-1 text-xs text-slate-500">
+          Harga dalam Rupiah. Contoh: 10.000.000
+        </p>
       </div>
+
+      {/* Geometry Validation Error */}
+      {errors.geometry?.message && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3">
+          <p className="text-sm text-red-600 font-medium">⚠️ {errors.geometry.message}</p>
+          <p className="mt-1 text-xs text-red-500">
+            Please draw a polygon on the map by clicking at least 3 times, then double-click to complete.
+          </p>
+        </div>
+      )}
 
       {/* Form Actions */}
       <div className="flex gap-2 mt-6">

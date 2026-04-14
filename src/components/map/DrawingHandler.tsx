@@ -4,6 +4,7 @@ import L from 'leaflet'
 
 interface DrawingHandlerProps {
   onDrawingComplete: (coordinates: number[][]) => void
+  onPointAdd?: (point: [number, number]) => void
   onCancel: () => void
   isActive: boolean
 }
@@ -41,6 +42,7 @@ function isNearPoint(
  */
 export function DrawingHandler({
   onDrawingComplete,
+  onPointAdd,
   onCancel,
   isActive,
 }: DrawingHandlerProps) {
@@ -71,6 +73,11 @@ export function DrawingHandler({
       }
 
       setPoints([...points, newPoint])
+
+      // Notify parent about the new point for visual feedback
+      if (onPointAdd) {
+        onPointAdd(newPoint)
+      }
     },
 
     dblclick: (e) => {
